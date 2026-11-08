@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""ABI 回归门：原厂模块能否加载到自编内核上。
+
+判据（按优先级）：
+  1. 每个模块的 `__versions` 条目若指向内核导出符号，其期望 CRC 必须与自编内核导出一致；
+  2. 每个模块的未定义符号必须由内核导出或模块间导出提供；
+  3. 输出不匹配条数与示例，退出码 0 表示全部通过。
+
+用法：
+  abi-gate.py --stock-symvers <原厂 Module.symvers> --our-symvers <自编 vmlinux.symvers> \
+      --modules <vendor_boot 模块目录> --modules <vendor_dlkm 模块目录> [--out report.md]
+"""
+import argparse
+import os
+import re
+import struct
+import subprocess
+import sys
+
+
+def run(cmd):
+    return subprocess.run(cmd, capture_output=True, text=True)
+
+
+def load_symvers(path):
+    d = {}
+    for line in open(path, encoding='utf-8', errors='replace'):
+        f = line.rstrip('\n').split('\t')
+        if len(f) >= 2 and f[0].startswith('0x'):
+            d[f[1]] = f[0].lower()
+    return d
+
+
+def module_versions(ko):
+    h = run(['readelf', '-S', '-W', ko]).stdout
+    m = re.search(r'__versions\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', h)
+    if not m:
+        return {}
+    off, size = int(m.group(2), 16), int(m.group(3), 16)
+    if not size:
+        return {}
+    with open(ko, 'rb') as f:
+        f.seek(off)
+        data = f.read(size)
+    out = {}
+    for i in range(0, len(data) - 63, 64):
+        crc = struct.unpack('<Q', data[i:i + 8])[0]
+        name = data[i + 8:i + 64].split(b'\0')[0].decode('ascii', 'replace')
+        if name:
+            out[name] = '0x%08x' % crc
+    return out
+
+
+def module_imports(ko):
+    p = run(['nm', '-u', ko])
+    return {l.split()[-1] for l in p.stdout.splitlines() if l.split()}
+
+
+def module_exports(ko):
+    p = run(['nm', '--defined-only', ko])
+    out = set()
+    for line in p.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+        for pre in ('__ksymtab_gpl_', '__ksymtab_'):
+            if parts[2].startswith(pre):
+                out.add(parts[2][len(pre):])
+                break
+    return out
+
+
+def main(argv):
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--stock-symvers', required=True)
+    ap.add_argument('--our-symvers', required=True)
+    ap.add_argument('--modules', action='append', default=[])
+    ap.add_argument('--out')
+    ap.add_argument('--allow-unresolved-prefix', action='append', default=[],
+                    help='已知本地缺件导致的未解析符号前缀（记为警告，不判失败）')
+    a = ap.parse_args(argv[1:])
+
+    stock = load_symvers(a.stock_symvers)
+    ours = load_symvers(a.our_symvers)
+
+    kos = []
+    for root in a.modules:
+        for r, _d, files in os.walk(root):
+            for fn in files:
+                if fn.endswith('.ko'):
+                    kos.append(os.path.join(r, fn))
+    if not kos:
+        raise SystemExit('没有找到 .ko')
+
+    mod_exports = set()
+    for ko in kos:
+        mod_exports |= module_exports(ko)
+    provided = set(ours) | mod_exports
+
+    version_mismatch = []
+    missing_imports = {}
+    for ko in kos:
+        rel = os.path.basename(ko)
+        for sym, expect in module_versions(ko).items():
+            if sym in stock:  # 内核提供的符号
+                if ours.get(sym, '').lower() != expect.lower():
+                    version_mismatch.append((rel, sym, expect, ours.get(sym)))
+        lack = sorted(s for s in module_imports(ko) if s not in provided and s != 'module_layout')
+        if lack:
+            hard = [s for s in lack if not any(s.startswith(pre) for pre in a.allow_unresolved_prefix)]
+            if hard:
+                missing_imports[rel] = hard
+
+    md = []
+    md.append('# ABI 回归门\n')
+    md.append('- 模块 %d 个；内核导出 %d；模块间导出 %d' % (len(kos), len(ours), len(mod_exports)))
+    md.append('- 内核符号 CRC 不符：**%d** 条' % len(version_mismatch))
+    for r, s, e, g in version_mismatch[:10]:
+        md.append('  - %s:%s 期望 %s 实际 %s' % (r, s, e, g))
+    md.append('- 无法解析导入的模块：**%d**' % len(missing_imports))
+    for r, lack in list(missing_imports.items())[:10]:
+        md.append('  - %s 缺 %d：%s' % (r, len(lack), ', '.join(lack[:6])))
+    passed = not version_mismatch and not missing_imports
+    md.append('\n**判定：%s**' % ('PASS' if passed else 'FAIL'))
+    text = '\n'.join(md) + '\n'
+    print(text)
+    if a.out:
+        os.makedirs(os.path.dirname(a.out), exist_ok=True)
+        open(a.out, 'w', encoding='utf-8').write(text)
+    return 0 if passed else 1
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
