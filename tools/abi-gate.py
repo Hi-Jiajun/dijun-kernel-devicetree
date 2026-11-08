@@ -73,7 +73,7 @@ def module_exports(ko):
 
 def main(argv):
     ap = argparse.ArgumentParser()
-    ap.add_argument('--stock-symvers', required=True)
+    ap.add_argument('--stock-symvers', help='原厂导出符号表；省略时以自编内核为准判断哪些符号由内核提供')
     ap.add_argument('--our-symvers', required=True)
     ap.add_argument('--modules', action='append', default=[])
     ap.add_argument('--out')
@@ -81,8 +81,8 @@ def main(argv):
                     help='已知本地缺件导致的未解析符号前缀（记为警告，不判失败）')
     a = ap.parse_args(argv[1:])
 
-    stock = load_symvers(a.stock_symvers)
     ours = load_symvers(a.our_symvers)
+    stock = load_symvers(a.stock_symvers) if a.stock_symvers else ours
 
     kos = []
     for root in a.modules:
@@ -103,8 +103,8 @@ def main(argv):
     for ko in kos:
         rel = os.path.basename(ko)
         for sym, expect in module_versions(ko).items():
-            if sym in stock:  # 内核提供的符号
-                if ours.get(sym, '').lower() != expect.lower():
+            if sym in ours:  # 该符号由内核提供，模块会校验 CRC
+                if ours[sym].lower() != expect.lower():
                     version_mismatch.append((rel, sym, expect, ours.get(sym)))
         lack = sorted(s for s in module_imports(ko) if s not in provided and s != 'module_layout')
         if lack:
