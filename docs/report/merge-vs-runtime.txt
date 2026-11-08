@@ -1,0 +1,58 @@
+=== /tmp/pdump/merged-vb.dtb
+=== stock/runtime.fdt
+only in /tmp/pdump/merged-vb.dtb: 194
+  - /bw_kmd
+  - /cpus/agent-irq
+  - /cpus/domain-idle-states
+  - /cpus/domain-idle-states/cluster-sleep-B
+  - /cpus/domain-idle-states/cluster-sleep-M
+  - /cpus/domain-idle-states/cluster-sleep-l
+  - /cpus/domain-idle-states/cluster-sleep-ml
+  - /cpus/domain-idle-states/system-sleep
+  - /ddr_profile_monitor
+  - /domain-idle-gov
+  ... 另有 184 项
+only in stock/runtime.fdt: 91
+  + /cpus/idle-states/cluster-sleep-B
+  + /cpus/idle-states/cluster-sleep-M
+  + /cpus/idle-states/cluster-sleep-l
+  + /cpus/idle-states/cluster-sleep-ml
+  + /cpus/psci
+  + /ddr-opp-table/opp-0
+  + /ddr-opp-table/opp-1
+  + /ddr-opp-table/opp-2
+  + /ddr-opp-table/opp-3
+  + /ddr-opp-table/opp-4
+  ... 另有 81 项
+属性差异: 2846
+  ~ /__symbols__ : CLUSTER_PD0
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cluster0')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : CLUSTER_PD1
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cluster1')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : CLUSTER_PD2
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cluster2')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : CLUSTER_PD3
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cluster3')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : CLUSTER_SLEEP_B
+      /tmp/pdump/merged-vb.dtb: str('/cpus/domain-idle-states/cluster-sleep-B')
+      stock/runtime.fdt: str('/cpus/idle-states/cluster-sleep-B')
+  ~ /__symbols__ : CLUSTER_SLEEP_L
+      /tmp/pdump/merged-vb.dtb: str('/cpus/domain-idle-states/cluster-sleep-l')
+      stock/runtime.fdt: str('/cpus/idle-states/cluster-sleep-l')
+  ~ /__symbols__ : CLUSTER_SLEEP_M
+      /tmp/pdump/merged-vb.dtb: str('/cpus/domain-idle-states/cluster-sleep-M')
+      stock/runtime.fdt: str('/cpus/idle-states/cluster-sleep-M')
+  ~ /__symbols__ : CLUSTER_SLEEP_ML
+      /tmp/pdump/merged-vb.dtb: str('/cpus/domain-idle-states/cluster-sleep-ml')
+      stock/runtime.fdt: str('/cpus/idle-states/cluster-sleep-ml')
+  ~ /__symbols__ : CPU_PD0
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cpu0')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : CPU_PD1
+      /tmp/pdump/merged-vb.dtb: str('/psci/power-domain-cpu1')
+      stock/runtime.fdt: <缺失>
+  ... 另有 2836 项

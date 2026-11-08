@@ -1,0 +1,55 @@
+=== stock/merged-os3.dtb
+=== stock/runtime.fdt
+only in stock/merged-os3.dtb: 2
+  - /gpu-opp-table/opp-1497
+  - /opp_table@3/opp-14
+only in stock/runtime.fdt: 11
+  + /ddr-opp-table/opp-0
+  + /ddr-opp-table/opp-1
+  + /ddr-opp-table/opp-2
+  + /ddr-opp-table/opp-3
+  + /ddr-opp-table/opp-4
+  + /ddr-opp-table/opp-5
+  + /ddr-opp-table/opp-6
+  + /ddr-opp-table/opp-7
+  + /ddr-opp-table/opp-8
+  + /ddr-opp-table/opp-9
+  + /memory@0/superinfo
+属性差异: 1032
+  ~ /__symbols__ : camf_clk_2_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camf_clk_2_default')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camf_clk_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camf_clk_default')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camf_clk_init
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camf_clk_init')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camf_clk_sleep
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camf_clk_sleep')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camt_clk_2_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camt_clk_2_default')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camt_clk_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camt_clk_default')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camt_clk_init
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camt_clk_init')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camt_clk_sleep
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camt_clk_sleep')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camu_clk_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camu_clk_default')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camu_clk_init
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camu_clk_init')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camu_clk_sleep
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camu_clk_sleep')
+      stock/runtime.fdt: <缺失>
+  ~ /__symbols__ : camw_mclk1v2_default
+      stock/merged-os3.dtb: str('/soc/pinctrl@0/pinctrl-configs@0/camw_mclk1v2_default')
+      stock/runtime.fdt: <缺失>
+  ... 另有 1020 项

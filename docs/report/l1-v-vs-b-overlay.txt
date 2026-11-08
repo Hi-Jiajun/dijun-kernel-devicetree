@@ -1,0 +1,10 @@
+=== stock/dtbo-device/entry05_id090f0000_rev0.dtbo
+=== build/v/o2s_phone_overlay.dtbo
+only in stock/dtbo-device/entry05_id090f0000_rev0.dtbo: 10
+  ... 另有 10 项
+only in build/v/o2s_phone_overlay.dtbo: 1
+  ... 另有 1 项
+属性差异: 270
+  ... 另有 270 项
+__fixups__ 标签: 仅 stock/dtbo-device/entry05_id090f0000_rev0.dtbo 2 个，仅 build/v/o2s_phone_overlay.dtbo 0 个
+  仅 stock/dtbo-device/entry05_id090f0000_rev0.dtbo: ['cpnv', 'pcie_smmu']

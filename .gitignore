@@ -1,0 +1,12 @@
+build/
+out*/
+*.o
+*.o.cmd
+*.pp
+*.dtc.log
+__pycache__/
+*.pyc
+*.ko
+*.img
+stock/*.img
+vendor_boot*/
