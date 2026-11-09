@@ -32,18 +32,41 @@ def load_symvers(path):
     return d
 
 
-def module_versions(ko):
+def _section(ko, name):
     h = run(['readelf', '-S', '-W', ko]).stdout
-    m = re.search(r'__versions\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', h)
+    m = re.search(r'\b' + re.escape(name) + r'\s+\w+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', h)
     if not m:
-        return {}
-    off, size = int(m.group(2), 16), int(m.group(3), 16)
-    if not size:
-        return {}
-    with open(ko, 'rb') as f:
-        f.seek(off)
-        data = f.read(size)
+        return None
+    return int(m.group(2), 16), int(m.group(3), 16)
+
+
+def module_versions(ko):
+    """读取模块期望的符号 CRC。
+
+    6.18 起 EXTENDED_MODVERSIONS 用 `__version_ext_crcs`(u32) + `__version_ext_names`，
+    加载器优先只看这一组；老格式 `__versions` 仅在扩展段缺失时使用。
+    """
+    ext_crc = _section(ko, '__version_ext_crcs')
+    ext_name = _section(ko, '__version_ext_names')
+    blob = open(ko, 'rb').read()
     out = {}
+    if ext_crc and ext_name:
+        off_c, size_c = ext_crc
+        off_n, size_n = ext_name
+        crcs = struct.unpack('<%dI' % (size_c // 4), blob[off_c:off_c + size_c])
+        names_blob = blob[off_n:off_n + size_n]
+        pos = 0
+        for c in crcs:
+            end = names_blob.index(b'\0', pos)
+            name = names_blob[pos:end].decode('ascii', 'replace')
+            pos = end + 1
+            out[name] = '0x%08x' % c
+        return out
+    sec = _section(ko, '__versions')
+    if not sec:
+        return {}
+    off, size = sec
+    data = blob[off:off + size]
     for i in range(0, len(data) - 63, 64):
         crc = struct.unpack('<Q', data[i:i + 8])[0]
         name = data[i + 8:i + 64].split(b'\0')[0].decode('ascii', 'replace')
@@ -53,8 +76,16 @@ def module_versions(ko):
 
 
 def module_imports(ko):
-    p = run(['nm', '-u', ko])
-    return {l.split()[-1] for l in p.stdout.splitlines() if l.split()}
+    """只统计强未定义符号；weakref（nm 类型 w/v）是可选依赖，缺失不影响加载。"""
+    p = run(['nm', ko])
+    out = set()
+    for line in p.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[1] == 'U':
+            out.add(parts[2])
+        elif len(parts) == 2 and parts[0] == 'U':
+            out.add(parts[1])
+    return out
 
 
 def module_exports(ko):
