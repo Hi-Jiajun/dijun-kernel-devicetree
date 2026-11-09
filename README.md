@@ -6,9 +6,10 @@
 
 ## 当前状态（2026-11-09）
 
-- **双基线 DTS**：`dts/` 是官方开源 DTS（Android V / 6.6.30）；`dts-reconstructed/` 是从设备分区二进制无损还原的 6.6.118 基线（回编与设备二进制逐字节一致）。
+- **三代 DTS 基线**：`dts/` 是官方开源 DTS（Android V / 6.6.30）；`dts-reconstructed/6.6.118-os3/` 与 `dts-reconstructed/6.18.21-os4/` 是从设备分区二进制无损还原的两代基线（回编与设备二进制逐字节一致）。
 - **两种打包链可复现**：`dtbo.img` 用设备 8 个 entry 重打、`vendor_boot` 用原厂件重打，均与设备镜像逐字节一致。
 - **ABI 对齐**：6.6.118 保持原厂 config 重编，导出符号 9,090/9,090、CRC 全等；6.18.21 用 AOSP 公开源 + 厂商同款工具链，404 个原厂模块 CRC 全等。
+- **当前内核基线**：AOSP `android17-6.18-2026-09`（6.18.32），已在 OS4 真机验证；更新流程见 [kernel-update-process](docs/kernel-compat/2026-11-09-kernel-update-process.md)。
 - **真机验证**：自编 6.18.21 / 6.18.32 内核在 OS4 上均正常启动、功能基本可用；`CONFIG_PID_NS=y` 变体验证通过（PID namespace 可用）。`android17-6.18` 分支头 6.18.33 因 ABI 类型变化暂不兼容 OS4 原厂模块。
 - **已知缺口**：`xr_pmonitor` 是死模块（依赖的 `lp_mnt` 在内核与分区中都不存在）；原厂 `rust_binder.ko` 与自编内核 crate 哈希不匹配，需用本仓库自编并签名的模块替代。
 
@@ -17,11 +18,13 @@
 | 路径 | 内容 |
 | --- | --- |
 | `dts/` | 官方开源 DTS（Android V / 6.6.30），cpp + dtc 可编 |
-| `dts-reconstructed/` | 由设备 `vendor_boot` dtb 与 `dtbo` 的 O2S entry 还原的 6.6.118 基线 |
+| `dts-reconstructed/6.6.118-os3/` | OS3 分区二进制还原的 6.6.118 基线 |
+| `dts-reconstructed/6.18.21-os4/` | OS4 分区二进制还原的 6.18.21 基线 |
 | `include/` | 补齐的 xring dt-bindings（`platform-specific` 映射） |
-| `baseline/` | 原厂 `base.dtb` 与 8 个 dtbo entry（二进制，仅作回归基线） |
-| `tools/` | Python 工具：结构 diff、dtbo 打包、ABI 门、模块盘点、BTF 对比、CRC 改写 |
-| `scripts/` | Shell 入口：`verify.sh`、`pack-vendor_boot.sh`、`demo-patch.sh` |
+| `baseline/6.6.118-os3/`、`baseline/6.18.21-os4/` | 两代原厂 `base.dtb` 与 8 个 dtbo entry（二进制，回归基线） |
+| `configs/6.18/` | 内核 config、模块符号白名单、内核基线版本（`baseline.env`） |
+| `tools/` | Python 工具：结构 diff、dtbo 提取/打包、ABI 门、模块盘点、BTF 对比、CRC 改写 |
+| `scripts/` | Shell 入口：`verify.sh`、`build-kernel.sh`、`pack-vendor_boot.sh`、`demo-patch.sh` |
 | `docs/device-tree/` | 设备树调研与构建/验收记录 |
 | `docs/kernel-compat/` | GKI/KMI、工具链、OS4 6.18 自编内核与功能开关文档 |
 | `docs/runbooks/` | 真机自编内核的首测失败与成功记录（含回滚方式） |

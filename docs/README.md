@@ -9,6 +9,7 @@
 
 - [2026-11-09-gki-kmi-alignment.md](kernel-compat/2026-11-09-gki-kmi-alignment.md) — 6.6.118 与 6.18.21 的 GKI/KMI 对齐、根因与功能开关结论
 - [2026-11-09-os4-6.18-bringup.md](kernel-compat/2026-11-09-os4-6.18-bringup.md) — OS4 6.18.21 自编内核全过程、工具链、真机结果
+- [2026-11-09-kernel-update-process.md](kernel-compat/2026-11-09-kernel-update-process.md) — 6.18 内核基线、AOSP 更新流程与门禁
 - [2026-11-09-kernel-comparison.md](kernel-compat/2026-11-09-kernel-comparison.md) — 自编内核与官方内核的差异对比
 - [2026-11-10-compat-baseline-and-feature-gates.md](kernel-compat/2026-11-10-compat-baseline-and-feature-gates.md) — 兼容基线与功能开关的构建记录
 

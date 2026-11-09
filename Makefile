@@ -1,25 +1,27 @@
-# dijun（小米 15S Pro / XRING O1 / 25042PN24C）设备树工程
+# dijun（小米 15S Pro / XRING O1 / 25042PN24C）内核设备树构建入口
 #
-# 两条基线：
-#   V 基线  dts/    官方开源 OSS（Android V，common 6.6.30）的 DTS 源码，可 cpp+dtc 直接编
-#   B 基线  dts-reconstructed/  设备实际运行（OS3 / 6.6.118）的分区二进制无损还原出的 DTS
+# 基线：
+#   V 基线  dts/                       官方开源 DTS（Android V / 6.6.30），cpp+dtc 可编
+#   B 基线  dts-reconstructed/6.6.118-os3   设备 OS3 分区二进制无损还原
+#   B 基线  dts-reconstructed/6.18.21-os4   设备 OS4 分区二进制无损还原
 #
 # 常用目标：
-#   make all            编出 V 与 B 两套 base dtb + O2S phone overlay
-#   make kbuild-v KDIR=...   用内核树自己的 kbuild 编（dtstree= 外部设备树）
-#   make dtboimg        打 dtbo.img（Android dtbo 容器）
-#   make vendor_boot    重打 vendor_boot（DT 实际所在分区）
-#   make verify         跑离线验收：回编哈希、结构 diff、容器同构
+#   make all            编 V 与 B 两代 base dtb + O2S overlay
+#   make b              只编 B 两代（不需要内核树）
+#   make verify         离线验收：回编哈希、结构 diff、容器同构
+#   make dtboimg        用 OS3 的 8 个 entry 重打 dtbo.img
+#   make dtboimg-os4    用 OS4 的 8 个 entry 重打 dtbo.img
+#   make vendor_boot    用 B 基线 dtb 重打 vendor_boot
+#   make kbuild-v KDIR=<内核树>   用内核树自身 kbuild 编（dtstree= 外部设备树）
 
-ROOT    := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-B       := $(ROOT)/build
+ROOT     := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+B        := $(ROOT)/build
 BASELINE := $(ROOT)/baseline
-KERNEL  ?=
-DTC     ?= dtc
-CPP     ?= cpp
-JOBS    ?= 8
+KERNEL   ?=
+DTC      ?= dtc
+CPP      ?= cpp
+JOBS     ?= 8
 
-# cpp：dtc 的预处理约定；通用 dt-bindings 从内核树取，xring 绑定在本工程 include/
 CPPFLAGS := -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
             -I$(ROOT)/include -I$(ROOT)/dts \
             -I$(KERNEL)/include -I$(KERNEL)/arch/arm64/include
@@ -27,15 +29,18 @@ CPPFLAGS := -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 V_SRCS := $(shell find $(ROOT)/dts -name '*.dts' -o -name '*.dtsi' -o -name '*.dtso')
 V_BASE := $(B)/v/O1_basic.dtb
 V_OVL  := $(B)/v/o2s_phone_overlay.dtbo
-B_BASE := $(B)/b/base.dtb
-B_OVL  := $(B)/b/o2s_phone_overlay.dtbo
 
-.PHONY: all v b dtboimg vendor_boot verify kbuild-v kbuild-b clean help
+B3 := 6.6.118-os3
+B4 := 6.18.21-os4
+B_TARGETS := $(B)/b/$(B3)/base.dtb $(B)/b/$(B3)/o2s_phone_overlay.dtbo \
+             $(B)/b/$(B4)/base.dtb $(B)/b/$(B4)/o2s_phone_overlay.dtbo
+
+.PHONY: all v b dtboimg dtboimg-os4 vendor_boot verify kbuild-v kbuild-b clean help
 .DEFAULT_GOAL := all
 
 all: v b
 v: $(V_BASE) $(V_OVL)
-b: $(B_BASE) $(B_OVL)
+b: $(B_TARGETS)
 
 $(B)/v/O1_basic.dtb: $(V_SRCS)
 	@test -n "$(KERNEL)" || { echo "需要 KERNEL=<内核源码树>（仅取 include/dt-bindings）"; exit 2; }
@@ -49,59 +54,47 @@ $(B)/v/o2s_phone_overlay.dtbo: $(V_SRCS)
 	$(CPP) $(CPPFLAGS) $(ROOT)/dts/overlay/product/phone/phone_o2s/o2s_phone_overlay.dtso -o $@.pp
 	$(DTC) -q -@ -I dts -O dtb -o $@ $@.pp 2>$@.dtc.log
 
-# B 基线是从二进制还原的单文件 DTS，没有 include 依赖
-$(B)/b/base.dtb: $(ROOT)/dts-reconstructed/base.dts
+$(B)/b/$(B3)/base.dtb: $(ROOT)/dts-reconstructed/$(B3)/base.dts
 	@mkdir -p $(@D)
 	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
 
-$(B)/b/o2s_phone_overlay.dtbo: $(ROOT)/dts-reconstructed/o2s_phone_overlay.dts
+$(B)/b/$(B3)/o2s_phone_overlay.dtbo: $(ROOT)/dts-reconstructed/$(B3)/o2s_phone_overlay.dts
 	@mkdir -p $(@D)
 	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
 
-# dtbo.img：默认用设备 dtbo_a 里 8 个条目原样重打，验证容器同构
+$(B)/b/$(B4)/base.dtb: $(ROOT)/dts-reconstructed/$(B4)/base.dts
+	@mkdir -p $(@D)
+	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
+
+$(B)/b/$(B4)/o2s_phone_overlay.dtbo: $(ROOT)/dts-reconstructed/$(B4)/o2s_phone_overlay.dts
+	@mkdir -p $(@D)
+	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
+
+# dtbo.img：用某个基线的 8 个 entry 重打，验证容器同构
 dtboimg:
-	unset PYTHONHOME PYTHONPATH && python3 $(ROOT)/tools/mkdtboimg.py \
-	  --out $(B)/dtbo-repacked.img \
-	  $(foreach f,$(sort $(wildcard $(BASELINE)/dtbo-device/*.dtbo)),--entry $(f))
+	unset PYTHONHOME PYTHONPATH && python3 $(ROOT)/tools/mkdtboimg.py --out $(B)/dtbo-$(B3).img \
+	  $(foreach f,$(sort $(wildcard $(BASELINE)/$(B3)/dtbo/*.dtbo)),--entry $(f))
 
-# 保留其余 7 个 entry，只把 dijun 命中的 0x090f0000 换成我们重编的那份
-dtboimg-b:
-	@set -e; unset PYTHONHOME PYTHONPATH; args=""; \
-	for f in $(BASELINE)/dtbo-device/*.dtbo; do \
-	  case "$$f" in *090f0000*) f=$(B)/b/o2s_phone_overlay.dtbo;; esac; \
-	  args="$$args --entry $$f"; done; \
-	python3 $(ROOT)/tools/mkdtboimg.py --out $(B)/dtbo-b.img $$args
+dtboimg-os4:
+	unset PYTHONHOME PYTHONPATH && python3 $(ROOT)/tools/mkdtboimg.py --out $(B)/dtbo-$(B4).img \
+	  $(foreach f,$(sort $(wildcard $(BASELINE)/$(B4)/dtbo/*.dtbo)),--entry $(f))
 
 vendor_boot:
-	DTB=$(B)/b/base.dtb bash $(ROOT)/scripts/pack-vendor_boot.sh
+	DTB=$(B)/b/$(B3)/base.dtb bash $(ROOT)/scripts/pack-vendor_boot.sh
 
-# 用内核树自身的 kbuild 编（外部设备树，不改内核树）
+verify:
+	bash $(ROOT)/scripts/verify.sh
+
 kbuild-v:
 	@test -n "$(KDIR)" || { echo "用法: make kbuild-v KDIR=<内核树>"; exit 2; }
 	@set -e; unset PYTHONHOME PYTHONPATH; \
-	O=$$(mktemp -d <home>/dijun-dts-kbuild.XXXXXX); \
-	D=$$(mktemp -d <home>/dijun-dts-ext.XXXXXX); \
+	O=$$(mktemp -d $${TMPDIR:-/var/tmp}/dijun-dts-kbuild.XXXXXX); \
+	D=$$(mktemp -d $${TMPDIR:-/var/tmp}/dijun-dts-ext.XXXXXX); \
 	cp -a $(ROOT)/dts $$D/dts; cp -a $(ROOT)/include $$D/include; \
 	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 olddefconfig; \
 	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 dtstree=$$D/dts \
 	  DTC_INCLUDE="$$D/include $(KDIR)/scripts/dtc/include-prefixes" dtbs -j$(JOBS); \
-	echo "内核树产物在 $$D/dts（外部 dtstree 的 obj=src），O=$$O"; \
-	find $$D/dts \( -name '*.dtb' -o -name '*.dtbo' \) -printf '%s %p\n'
-
-kbuild-b:
-	@test -n "$(KDIR)" || { echo "用法: make kbuild-b KDIR=<内核树>"; exit 2; }
-	@set -e; unset PYTHONHOME PYTHONPATH; \
-	O=$$(mktemp -d <home>/dijun-dts-kbuild.XXXXXX); \
-	D=$$(mktemp -d <home>/dijun-dts-ext.XXXXXX); \
-	cp -a $(ROOT)/dts-reconstructed $$D/dts; \
-	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 olddefconfig; \
-	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 dtstree=$$D/dts \
-	  DTC_INCLUDE="$(KDIR)/scripts/dtc/include-prefixes" dtbs -j$(JOBS); \
-	echo "内核树产物在 $$D/dts，O=$$O"; \
-	find $$D/dts \( -name '*.dtb' -o -name '*.dtbo' \) -printf '%s %p\n'
-
-verify:
-	bash $(ROOT)/scripts/verify.sh
+	echo "产物在 $$D/dts，O=$$O"
 
 help:
 	@grep -E '^#   ' Makefile
