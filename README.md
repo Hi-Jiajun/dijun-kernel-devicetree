@@ -50,6 +50,20 @@ python3 tools/abi-gate.py --stock-symvers <原厂 symvers> \
   --out docs/reports/abi-gate.md
 ```
 
+## 内核构建（可复现）
+
+```bash
+export CLANG_BIN=<clang-r584948c>/bin
+export RUSTC=<rust-1.91.1.p3>/bin/rustc
+export RUST_LIB_SRC=<rust-1.91.1.p3>/lib/rustlib/src/rust/library
+export BINDGEN=$(command -v bindgen)
+scripts/build-kernel.sh --source <AOSP android17-6.18 树> --out <构建目录> \
+  --sign <构建目录>/drivers/android/binder/rust_binder.ko \
+  --gate-modules <vendor_boot 模块目录> --gate-modules <vendor_dlkm 目录> --gate-modules <system_dlkm 目录>
+```
+
+配置与符号白名单在 `configs/6.18/`；脚本会补 `protected_module_names_list`、强制 `KBUILD_GENDWARFKSYMS_STABLE=1`、构建模块、签名指定模块并运行 ABI 门。构建出的 Image 与 `Module.symvers` 用于后续刷机与校验。
+
 ## 方法学
 
 - 判据优先看**模块 `__versions` 期望 CRC 与实际内核导出的差异条数**（基线 0），全量 CRC 百分比只作诊断。
