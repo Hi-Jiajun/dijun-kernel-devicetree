@@ -81,7 +81,7 @@ OpenHarmony 内核是另一套东西：`kernel_linux` 是 4.19.155、`kernel_lin
 
 ## 仓库
 
-本工作已整理成私有仓库 `Hi-Jiajun/dijun-kernel-dt`（DTS 工程、工具、结论与运行记录；路径与序列号已脱敏，不含设备镜像与 .ko）。
+本工作已整理成私有仓库 `Hi-Jiajun/dijun-kernel-devicetree`（DTS 工程、工具、结论与运行记录；路径与序列号已脱敏，不含设备镜像与 .ko）。
 
 ## 风险与下一步
 

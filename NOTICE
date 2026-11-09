@@ -1,2 +1,5 @@
-本仓库包含第三方 GPL-2.0 / MIT 代码（Xiaomi dijun OSS 设备树），保留原始 SPDX 头。
-stock/ 与 dts-b/ 为自有设备上 GPL 内核二进制的衍生结果，仅用于自有设备研究与兼容性验证。
+本仓库包含来自小米开源 dijun 内核设备树（dijun-v-oss）的 GPL-2.0 / MIT 代码，原始 SPDX 头保留在各文件内。
+
+`baseline/`（原厂 base.dtb 与 dtbo entry）与 `dts-reconstructed/`（由设备分区二进制还原的 DTS）属于 GPL 内核二进制的衍生产物，仓库整体按 GPL-2.0（见 LICENSE）分发；`tools/` 与 `scripts/` 为自写脚本，按 MIT（见 LICENSE-MIT）分发。
+
+本仓库不包含设备分区镜像、厂商闭源二进制或任何凭据。仅限自有设备的授权研究使用。

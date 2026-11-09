@@ -97,7 +97,7 @@ config 设备 /proc/config.gz 原始导出（config.device，sha256 6fa1a889…�
 
 ## 仓库
 
-本实验与设备树工程已整理到私有仓库 `Hi-Jiajun/dijun-kernel-dt`（工具、结论、运行记录；已脱敏）。
+本实验与设备树工程已整理到私有仓库 `Hi-Jiajun/dijun-kernel-devicetree`（工具、结论、运行记录；已脱敏）。
 
 ## 追加实验：CGROUP_PIDS 的枚举顺序补丁（2026-11-10）
 
