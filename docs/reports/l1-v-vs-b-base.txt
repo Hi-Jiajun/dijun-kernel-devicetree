@@ -1,6 +1,6 @@
-=== stock/base.dtb
+=== baseline/base.dtb
 === build/v/O1_basic.dtb
-only in stock/base.dtb: 30
+only in baseline/base.dtb: 30
   ... 另有 30 项
 only in build/v/O1_basic.dtb: 12
   ... 另有 12 项

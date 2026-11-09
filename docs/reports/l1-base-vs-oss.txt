@@ -1,6 +1,6 @@
-=== stock/base.dtb
+=== baseline/base.dtb
 === build/O1_basic.dtb
-only in stock/base.dtb: 30
+only in baseline/base.dtb: 30
   - /cpnv
   - /cpnv/device@1
   - /cpnv/device@2
@@ -22,27 +22,27 @@ only in build/O1_basic.dtb: 12
   ... 另有 4 项
 属性差异: 814
   ~ / : compatible
-      stock/base.dtb: str('XiaoMi,Xring_o1-basic')
+      baseline/base.dtb: str('XiaoMi,Xring_o1-basic')
       build/O1_basic.dtb: str('XiaoMi,Franklin1-basic')
   ~ / : model
-      stock/base.dtb: str('XiaoMi Xring_o1 Basic')
+      baseline/base.dtb: str('XiaoMi Xring_o1 Basic')
       build/O1_basic.dtb: str('XiaoMi Franklin1 Basic')
   ~ /__symbols__ : bl31
-      stock/base.dtb: str('/reserved-memory/rsv_mem_bl31@42880000')
+      baseline/base.dtb: str('/reserved-memory/rsv_mem_bl31@42880000')
       build/O1_basic.dtb: <缺失>
   ~ /__symbols__ : cpnv
-      stock/base.dtb: str('/cpnv')
+      baseline/base.dtb: str('/cpnv')
       build/O1_basic.dtb: <缺失>
   ~ /__symbols__ : franklin1_memory
-      stock/base.dtb: <缺失>
+      baseline/base.dtb: <缺失>
       build/O1_basic.dtb: str('/memory@0')
   ~ /__symbols__ : lpctrl_rpc
-      stock/base.dtb: str('/lpctrl_rpc')
+      baseline/base.dtb: str('/lpctrl_rpc')
       build/O1_basic.dtb: <缺失>
   ~ /__symbols__ : mpmic_debug
-      stock/base.dtb: str('/soc/spmi@E0001000/pmic@f/mpmic_debug')
+      baseline/base.dtb: str('/soc/spmi@E0001000/pmic@f/mpmic_debug')
       build/O1_basic.dtb: <缺失>
   ~ /__symbols__ : rsv_mem_001
-      stock/base.dtb: <缺失>
+      baseline/base.dtb: <缺失>
       build/O1_basic.dtb: str('/reserved-memory/rsv_mem_001@35680000')
   ... 另有 806 项

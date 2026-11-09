@@ -16,17 +16,17 @@ adb exec-out su -c 'cat /sys/firmware/fdt'                         > stock/runti
 
 ## 2. 解析 DTBO 容器
 
-`scripts/mkdtboimg.py --info` 读出头部（大端）：`magic=0xd7b7ab1e total=2819691 header=32 entry=32 count=8 entries_off=32 page=2048 version=0`。8 个 entry 连续排布、不按页填充，`total_size = 288 + Σ载荷`，与设备容器逐字节吻合。导出后得到 `stock/dtbo-device/` 下 8 个 `.dtbo`，其中 `0x090f0000` 那份 437,616 B。
+`scripts/mkdtboimg.py --info` 读出头部（大端）：`magic=0xd7b7ab1e total=2819691 header=32 entry=32 count=8 entries_off=32 page=2048 version=0`。8 个 entry 连续排布、不按页填充，`total_size = 288 + Σ载荷`，与设备容器逐字节吻合。导出后得到 `baseline/dtbo-device/` 下 8 个 `.dtbo`，其中 `0x090f0000` 那份 437,616 B。
 
 `vendor_boot` 解包（`unpack_bootimg`，需先 `unset PYTHONHOME PYTHONPATH`）：header v4、`dtb size: 180674`、vendor_ramdisk 一表一项、bootconfig 206 B、`dtb address 0x08200000`。**boot.img 解包后没有 dtb 段**（`kernel 42,936,832 B`、无 ramdisk），这也印证「设备树不在 boot」。
 
 ## 3. 还原与回编（L0/L1）
 
 ```
-dtc -I dtb -O dts -o dts-b/base.dts stock/base.dtb                         # exit 0
-dtc -I dtb -O dts -o dts-b/o2s_phone_overlay.dts stock/dtbo-device/entry05_id090f0000_rev0.dtbo   # exit 0
-dtc -q -@ -I dts -O dtb -o build/b/base.dtb dts-b/base.dts                 # exit 0
-dtc -q -@ -I dts -O dtb -o build/b/o2s_phone_overlay.dtbo dts-b/o2s_phone_overlay.dts             # exit 0
+dtc -I dtb -O dts -o dts-reconstructed/base.dts baseline/base.dtb                         # exit 0
+dtc -I dtb -O dts -o dts-reconstructed/o2s_phone_overlay.dts baseline/dtbo-device/entry05_id090f0000_rev0.dtbo   # exit 0
+dtc -q -@ -I dts -O dtb -o build/b/base.dtb dts-reconstructed/base.dts                 # exit 0
+dtc -q -@ -I dts -O dtb -o build/b/o2s_phone_overlay.dtbo dts-reconstructed/o2s_phone_overlay.dts             # exit 0
 ```
 
 回编结果与设备二进制 sha256 完全一致：base `5ddc32ef…`（180,674 B）、overlay `74ff62ab…`（437,616 B）。反编译会丢注释和 include 结构，但节点/属性/标签（`__symbols__`、`__fixups__`）都保留，所以"无损"是字节级的，不只是语义级。
@@ -39,14 +39,14 @@ V 基线一开始编不过：`fatal error: dt-bindings/xring/platform-specific/c
 
 ```
 gcc -O2 -DNO_YAML -I libfdt -o /tmp/fdtoverlay fdtoverlay.c util.c libfdt/fdt*.c   # exit 0
-/tmp/fdtoverlay -i stock/vendor_boot/extracted/dtb -o build/merged-check.dtb stock/dtbo-device/entry05_id090f0000_rev0.dtbo  # exit 0
+/tmp/fdtoverlay -i stock/vendor_boot/extracted/dtb -o build/merged-check.dtb baseline/dtbo-device/entry05_id090f0000_rev0.dtbo  # exit 0
 ```
 
 合并结果 590,286 B，与设备 `/sys/firmware/fdt` 621,392 B 相比：只有 11 个节点多出来（`/ddr-opp-table/opp-0…9`、`/memory@0/superinfo`，引导期注入）和 2 个 OPP 节点少掉，1032 处属性差里绝大多数是 `__symbols__`。用 OS4 的 dtb+overlay 做同样操作则报 `FDT_ERR_NOTFOUND`（版本错配的直接证据），这也反证"必须用同一世代的分区件"。
 
 ## 5. 打包（L3）
 
-`scripts/mkdtboimg.py --out build/dtbo-repacked.img --entry stock/dtbo-device/*.dtbo` → 2,819,691 B，与设备 `dtbo_a` 前缀逐字节一致（`cmp` exit 0）。
+`scripts/mkdtboimg.py --out build/dtbo-repacked.img --entry baseline/dtbo-device/*.dtbo` → 2,819,691 B，与设备 `dtbo_a` 前缀逐字节一致（`cmp` exit 0）。
 
 `scripts/pack-vendor_boot.sh`（参数取自 `unpack_bootimg --format=mkbootimg`）用原厂 dtb 重打 23,379,968 B，与设备 `vendor_boot_a` 前缀逐字节一致；换 `build/b/base.dtb` 重打后再解包，dtb sha 与输入一致。
 

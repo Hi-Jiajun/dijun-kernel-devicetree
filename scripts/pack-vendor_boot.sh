@@ -13,7 +13,7 @@ set -euo pipefail
 unset PYTHONHOME PYTHONPATH
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-EX=$ROOT/stock/vendor_boot/extracted
+EX=$ROOT/baseline/vendor_boot/extracted
 DTB=${DTB:-$ROOT/build/b/base.dtb}
 OUT=${OUT:-$ROOT/build/vendor_boot-repacked.img}
 

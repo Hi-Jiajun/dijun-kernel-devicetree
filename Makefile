@@ -2,7 +2,7 @@
 #
 # 两条基线：
 #   V 基线  dts/    官方开源 OSS（Android V，common 6.6.30）的 DTS 源码，可 cpp+dtc 直接编
-#   B 基线  dts-b/  设备实际运行（Android 16 / 6.6.118）的分区二进制无损还原出的 DTS
+#   B 基线  dts-reconstructed/  设备实际运行（OS3 / 6.6.118）的分区二进制无损还原出的 DTS
 #
 # 常用目标：
 #   make all            编出 V 与 B 两套 base dtb + O2S phone overlay
@@ -13,8 +13,8 @@
 
 ROOT    := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 B       := $(ROOT)/build
-STOCK   := $(ROOT)/stock
-KERNEL  ?= <home>/ack-66118/src
+BASELINE := $(ROOT)/baseline
+KERNEL  ?=
 DTC     ?= dtc
 CPP     ?= cpp
 JOBS    ?= 8
@@ -38,37 +38,39 @@ v: $(V_BASE) $(V_OVL)
 b: $(B_BASE) $(B_OVL)
 
 $(B)/v/O1_basic.dtb: $(V_SRCS)
+	@test -n "$(KERNEL)" || { echo "需要 KERNEL=<内核源码树>（仅取 include/dt-bindings）"; exit 2; }
 	@mkdir -p $(@D)
 	$(CPP) $(CPPFLAGS) $(ROOT)/dts/soc/O1_basic.dts -o $@.pp
 	$(DTC) -q -@ -I dts -O dtb -o $@ $@.pp 2>$@.dtc.log
 
 $(B)/v/o2s_phone_overlay.dtbo: $(V_SRCS)
+	@test -n "$(KERNEL)" || { echo "需要 KERNEL=<内核源码树>（仅取 include/dt-bindings）"; exit 2; }
 	@mkdir -p $(@D)
 	$(CPP) $(CPPFLAGS) $(ROOT)/dts/overlay/product/phone/phone_o2s/o2s_phone_overlay.dtso -o $@.pp
 	$(DTC) -q -@ -I dts -O dtb -o $@ $@.pp 2>$@.dtc.log
 
 # B 基线是从二进制还原的单文件 DTS，没有 include 依赖
-$(B)/b/base.dtb: $(ROOT)/dts-b/base.dts
+$(B)/b/base.dtb: $(ROOT)/dts-reconstructed/base.dts
 	@mkdir -p $(@D)
 	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
 
-$(B)/b/o2s_phone_overlay.dtbo: $(ROOT)/dts-b/o2s_phone_overlay.dts
+$(B)/b/o2s_phone_overlay.dtbo: $(ROOT)/dts-reconstructed/o2s_phone_overlay.dts
 	@mkdir -p $(@D)
 	$(DTC) -q -@ -I dts -O dtb -o $@ $< 2>$@.dtc.log
 
 # dtbo.img：默认用设备 dtbo_a 里 8 个条目原样重打，验证容器同构
 dtboimg:
-	unset PYTHONHOME PYTHONPATH && python3 $(ROOT)/scripts/mkdtboimg.py \
+	unset PYTHONHOME PYTHONPATH && python3 $(ROOT)/tools/mkdtboimg.py \
 	  --out $(B)/dtbo-repacked.img \
-	  $(foreach f,$(sort $(wildcard $(STOCK)/dtbo-device/*.dtbo)),--entry $(f))
+	  $(foreach f,$(sort $(wildcard $(BASELINE)/dtbo-device/*.dtbo)),--entry $(f))
 
 # 保留其余 7 个 entry，只把 dijun 命中的 0x090f0000 换成我们重编的那份
 dtboimg-b:
 	@set -e; unset PYTHONHOME PYTHONPATH; args=""; \
-	for f in $(STOCK)/dtbo-device/*.dtbo; do \
+	for f in $(BASELINE)/dtbo-device/*.dtbo; do \
 	  case "$$f" in *090f0000*) f=$(B)/b/o2s_phone_overlay.dtbo;; esac; \
 	  args="$$args --entry $$f"; done; \
-	python3 $(ROOT)/scripts/mkdtboimg.py --out $(B)/dtbo-b.img $$args
+	python3 $(ROOT)/tools/mkdtboimg.py --out $(B)/dtbo-b.img $$args
 
 vendor_boot:
 	DTB=$(B)/b/base.dtb bash $(ROOT)/scripts/pack-vendor_boot.sh
@@ -91,7 +93,7 @@ kbuild-b:
 	@set -e; unset PYTHONHOME PYTHONPATH; \
 	O=$$(mktemp -d <home>/dijun-dts-kbuild.XXXXXX); \
 	D=$$(mktemp -d <home>/dijun-dts-ext.XXXXXX); \
-	cp -a $(ROOT)/dts-b $$D/dts; \
+	cp -a $(ROOT)/dts-reconstructed $$D/dts; \
 	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 olddefconfig; \
 	make -C $(KDIR) O=$$O ARCH=arm64 LLVM=1 dtstree=$$D/dts \
 	  DTC_INCLUDE="$(KDIR)/scripts/dtc/include-prefixes" dtbs -j$(JOBS); \

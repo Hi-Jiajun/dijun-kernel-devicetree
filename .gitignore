@@ -8,5 +8,5 @@ __pycache__/
 *.pyc
 *.ko
 *.img
-stock/*.img
+baseline/*.img
 vendor_boot*/

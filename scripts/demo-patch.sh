@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 可证伪性演示：在 B 基线里改一个属性，验证工具链只报出这一处差异。
 #
-# 做法：复制 dts-b/base.dts 到临时目录，在 /chosen 节点里加一个自定义属性，
+# 做法：复制 dts-reconstructed/base.dts 到临时目录，在 /chosen 节点里加一个自定义属性，
 # 重新编译，与设备原厂 base.dtb 做结构比较；期望 exactly 1 处属性差异、0 处节点差异。
 # 不改工程里的任何源文件，产物写 /tmp。
 set -euo pipefail
@@ -9,7 +9,7 @@ unset PYTHONHOME PYTHONPATH
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 T=$(mktemp -d <home>/dijun-dts-demo.XXXXXX)
-python3 - "$ROOT/dts-b/base.dts" "$T/base-demo.dts" <<'PY'
+python3 - "$ROOT/dts-reconstructed/base.dts" "$T/base-demo.dts" <<'PY'
 import sys
 src, dst = sys.argv[1], sys.argv[2]
 lines = open(src, encoding='utf-8').read().splitlines(True)
@@ -26,7 +26,7 @@ if not done:
 open(dst, 'w', encoding='utf-8').write(''.join(out))
 PY
 dtc -q -@ -I dts -O dtb -o "$T/base-demo.dtb" "$T/base-demo.dts" 2>"$T/dtc.log"
-python3 "$ROOT/scripts/fdtdiff.py" "$ROOT/stock/base.dtb" "$T/base-demo.dtb" --max-diff 5 >"$T/diff.txt" 2>&1
+python3 "$ROOT/tools/fdtdiff.py" "$ROOT/baseline/base.dtb" "$T/base-demo.dtb" --max-diff 5 >"$T/diff.txt" 2>&1
 python3 - "$T/diff.txt" <<'PY'
 import sys
 txt = open(sys.argv[1], encoding='utf-8').read()

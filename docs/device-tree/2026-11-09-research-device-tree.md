@@ -10,11 +10,11 @@
 
 **二、开源的那份 DTS 不是设备现在跑的那代。** 官方 OSS（`dijun-v-oss`，`common-gki` 是 **6.6.30**）的 DTS 把 base 叫 `XiaoMi Franklin1 Basic`；设备实际 base 是 `XiaoMi Xring_o1 Basic`。两者结构同源但内容有实质差异：V 版 923 节点、设备侧 941 节点；设备侧多 30 个节点（`cpnv`、`lp_mnt`、`lpctrl_rpc`、`sec_log_*`、`mpmic_debug`、`uft_ep_pcie`、`sensorhub/used_regs`、`xhee_xrvm_id` 等），reserved-memory 用语义名（`rsv_mem_tee@a0a00000`）而 V 版用泛名（`rsv_mem_011@a0a00000`），另有 202 处非 phandle 属性差异（`clocks` 50、`crg-base` 13、`reg` 8、`vote-mngs` 6 等）。**拿 V 版 DTS 去配设备上的 B 版内核，会把 reserved-memory 和时钟引用整体换掉，不是正确做法。**
 
-**三、设备自己那份设备树可以无损变回源码。** `vendor_boot` 的 dtb 与 `dtbo_a` 里 `id=0x090f0000` 的 overlay 反编译后，用 `dtc -@` 回编出的二进制与设备上的**逐字节相同**（`5ddc32ef…` 180674 B、`74ff62ab…` 437616 B）。所以 6.6.118 这条线不需要等厂商再发源码：`dts-b/` 就是可信、可改、可编的权威源，改完还能和原厂二进制做逐字节回归。
+**三、设备自己那份设备树可以无损变回源码。** `vendor_boot` 的 dtb 与 `dtbo_a` 里 `id=0x090f0000` 的 overlay 反编译后，用 `dtc -@` 回编出的二进制与设备上的**逐字节相同**（`5ddc32ef…` 180674 B、`74ff62ab…` 437616 B）。所以 6.6.118 这条线不需要等厂商再发源码：`dts-reconstructed/` 就是可信、可改、可编的权威源，改完还能和原厂二进制做逐字节回归。
 
 **四、打包链已闭环。** 用原厂 dtb 重打 `vendor_boot` 与设备镜像逐字节一致（23,379,968 B 内容区）；用设备 8 个 entry 重打 `dtbo.img` 与设备容器逐字节一致（`total_size=2,819,691`）。也就是说「改 DTS → 出 dtb → 换进 vendor_boot / 出新 dtbo.img」每一步都有可验证的等价基线，不是黑盒。
 
-**五、路线建议：B 线为主，V 线为参照，跨版本靠差分迁移。** 近期做 PixelOS/HarmonyOS 需要的硬件描述，用 `dts-b/`（设备实际世代）最稳；官方 V 版当参考实现和第二基线，用来对照 B 版里那些看不懂的节点；真要换到 V 版整套系统（内核 + xring-modules + DTS），再切 `dts/`。两条线共用同一套工程与验收脚本。
+**五、路线建议：B 线为主，V 线为参照，跨版本靠差分迁移。** 近期做 PixelOS/HarmonyOS 需要的硬件描述，用 `dts-reconstructed/`（设备实际世代）最稳；官方 V 版当参考实现和第二基线，用来对照 B 版里那些看不懂的节点；真要换到 V 版整套系统（内核 + xring-modules + DTS），再切 `dts/`。两条线共用同一套工程与验收脚本。
 
 ## 证据与做法
 
@@ -87,4 +87,4 @@ OpenHarmony 内核是另一套东西：`kernel_linux` 是 4.19.155、`kernel_lin
 
 写到 `dtbo` 或 `vendor_boot` 就等于动了引导相关分区：设备 `PANIC_ON_OOPS=y`、dm-verity 仍 enforcing，写坏 `dtbo` 后 BROM 没有可用的救砖通道。所以本轮把验收止步在「离线字节级等价」，真机验证另开实验，最低风险路径是只刷 `dtbo_a`（`dtbo_b` 保持原厂），或用 `fastboot boot` 之类不改分区的验证方式；回滚镜像与 `dtbo_a` 原件已在 `stock/` 留档。
 
-下一步按优先级：先在 B 基线上做**单点、可证伪**的改动（例如给 `chosen` 加 earlycon、或调整某个 pinctrl 属性），用 `make verify` 保证回编差异只剩预期的那几处，再考虑真机；PixelOS 侧把 `dts-b/` 当作 device tree 的 dtb 来源，而不是去改 AOSP 里的 `arch/arm64/boot/dts`；OH 侧先确认目标内核版本再决定是否需要把 DTS 反向迁到 5.10/6.6 的绑定版本。
+下一步按优先级：先在 B 基线上做**单点、可证伪**的改动（例如给 `chosen` 加 earlycon、或调整某个 pinctrl 属性），用 `make verify` 保证回编差异只剩预期的那几处，再考虑真机；PixelOS 侧把 `dts-reconstructed/` 当作 device tree 的 dtb 来源，而不是去改 AOSP 里的 `arch/arm64/boot/dts`；OH 侧先确认目标内核版本再决定是否需要把 DTS 反向迁到 5.10/6.6 的绑定版本。
