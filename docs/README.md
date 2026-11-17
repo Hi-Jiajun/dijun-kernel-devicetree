@@ -4,14 +4,16 @@
 
 - [2026-11-09-research-device-tree.md](device-tree/2026-11-09-research-device-tree.md) — dijun 设备树现状、V/B 两代差异、主流做法与选型、跨内核可移植性
 - [2026-11-09-build-and-verify.md](device-tree/2026-11-09-build-and-verify.md) — 从分区取件到回编、打包、验收的运行记录
+- [2026-11-17-os4-4.0.4.0-dt-baseline.md](device-tree/2026-11-17-os4-4.0.4.0-dt-baseline.md) — OS4.0.4.0 设备树基线、全 8 个 DTBO 还原、目录防误判重构、`fdtdiff.py` 修复与 `.dtso` 增量开发流
 
-## 内核兼容
+## 内核兼容与构建 SDK
 
 - [2026-11-09-gki-kmi-alignment.md](kernel-compat/2026-11-09-gki-kmi-alignment.md) — 6.6.118 与 6.18.21 的 GKI/KMI 对齐、根因与功能开关结论
 - [2026-11-09-os4-6.18-bringup.md](kernel-compat/2026-11-09-os4-6.18-bringup.md) — OS4 6.18.21 自编内核全过程、工具链、真机结果
 - [2026-11-09-kernel-update-process.md](kernel-compat/2026-11-09-kernel-update-process.md) — 6.18 内核基线、AOSP 更新流程与门禁
 - [2026-11-09-kernel-comparison.md](kernel-compat/2026-11-09-kernel-comparison.md) — 自编内核与官方内核的差异对比
 - [2026-11-10-compat-baseline-and-feature-gates.md](kernel-compat/2026-11-10-compat-baseline-and-feature-gates.md) — 兼容基线与功能开关的构建记录
+- [2026-11-17-extmod-sdk-and-profiles.md](kernel-compat/2026-11-17-extmod-sdk-and-profiles.md) — 6.18.32-4k 双契约（`vermagic` + `module_layout`）、`symvers` SDK、`build-extmod.sh` 与多线 Profile 构建
 
 ## 真机运行记录
 
@@ -20,4 +22,4 @@
 
 ## 原始报告
 
-- [reports/](reports/) — gate、结构 diff、模块盘点等原始输出
+- [reports/](reports/) — gate、结构 diff、OS4.0.0.19→OS4.0.4.0 变更报告、模块盘点等原始输出
