@@ -1,0 +1,125 @@
+diff -ruN a/drivers/android/dijun_hmos_ipc_api_v2.h b/drivers/android/dijun_hmos_ipc_api_v2.h
+--- a/drivers/android/dijun_hmos_ipc_api_v2.h	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/android/dijun_hmos_ipc_api_v2.h	2026-11-15 02:26:15.813394222 +0800
+@@ -0,0 +1,48 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * Read-only, typed CFI table for the external Harmony IPC module.
++ *
++ * Provenance: introduced by the dijun port of the upstream AnyHarmonyOSNext
++ * 6.6 adaptation draft and owned by the dijun bring-up effort. The exported
++ * symbol, struct and protocol magic use dijun names. The protocol contract is
++ * magic value "DIJUNIPC", version 2, size and the 20 function pointers.
++ */
++#ifndef DIJUN_HMOS_IPC_API_V2_H
++#define DIJUN_HMOS_IPC_API_V2_H
++#include <linux/cache.h>
++#include <linux/list_lru.h>
++#include <linux/poll.h>
++#include <linux/fdtable.h>
++#include <linux/capability.h>
++#include <linux/sched/mm.h>
++#include <linux/security.h>
++#include <linux/task_work.h>
++#include <linux/mm.h>
++#define DIJUN_HMOS_API_MAGIC 0x4350494e554a4944ULL
++struct dijun_hmos_ipc_api_v2 {
++    u64 magic;
++    u32 version;
++    u32 size;
++    typeof(__list_lru_init) *api___list_lru_init;
++    typeof(__wake_up_pollfree) *api___wake_up_pollfree;
++    typeof(file_close_fd) *api_file_close_fd;
++    typeof(has_capability_noaudit) *api_has_capability_noaudit;
++    typeof(list_lru_add) *api_list_lru_add;
++    typeof(list_lru_count_node) *api_list_lru_count_node;
++    typeof(list_lru_del) *api_list_lru_del;
++    typeof(list_lru_destroy) *api_list_lru_destroy;
++    typeof(list_lru_isolate) *api_list_lru_isolate;
++    typeof(list_lru_walk_node) *api_list_lru_walk_node;
++    typeof(mmput_async) *api_mmput_async;
++    typeof(security_binder_set_context_mgr) *api_security_binder_set_context_mgr;
++    typeof(security_binder_transaction) *api_security_binder_transaction;
++    typeof(security_binder_transfer_binder) *api_security_binder_transfer_binder;
++    typeof(security_binder_transfer_file) *api_security_binder_transfer_file;
++    typeof(security_cred_getsecid) *api_security_cred_getsecid;
++    typeof(security_release_secctx) *api_security_release_secctx;
++    typeof(security_secid_to_secctx) *api_security_secid_to_secctx;
++    typeof(task_work_add) *api_task_work_add;
++    typeof(zap_page_range_single) *api_zap_page_range_single;
++ };
++extern const struct dijun_hmos_ipc_api_v2 dijun_hmos_ipc_api_v2;
++#endif
+diff -ruN a/drivers/android/dijun_hmos_ipc_exports.c b/drivers/android/dijun_hmos_ipc_exports.c
+--- a/drivers/android/dijun_hmos_ipc_exports.c	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/android/dijun_hmos_ipc_exports.c	2026-11-15 02:26:15.846728761 +0800
+@@ -0,0 +1,41 @@
++// SPDX-License-Identifier: GPL-2.0
++/* Read-only, typed CFI entry points for the isolated Harmony IPC module.
++ * Function addresses are emitted by the C compiler as canonical jump-table
++ * entries. Raw kallsyms/export implementation addresses are not used.
++ * Original security/MM implementations and CFI enforcement remain intact.
++ *
++ * Provenance: table and implementation are carried over from the dijun port of
++ * the upstream AnyHarmonyOSNext 6.6 adaptation draft. The exported symbol,
++ * struct and protocol magic now use dijun names. */
++#include <linux/export.h>
++#include "dijun_hmos_ipc_api_v2.h"
++const struct dijun_hmos_ipc_api_v2 dijun_hmos_ipc_api_v2 = {
++    .magic = DIJUN_HMOS_API_MAGIC,
++    .version = 2,
++    .size = sizeof(struct dijun_hmos_ipc_api_v2),
++    .api___list_lru_init = __list_lru_init,
++    .api___wake_up_pollfree = __wake_up_pollfree,
++    .api_file_close_fd = file_close_fd,
++    .api_has_capability_noaudit = has_capability_noaudit,
++    .api_list_lru_add = list_lru_add,
++    .api_list_lru_count_node = list_lru_count_node,
++    .api_list_lru_del = list_lru_del,
++    .api_list_lru_destroy = list_lru_destroy,
++    .api_list_lru_isolate = list_lru_isolate,
++    .api_list_lru_walk_node = list_lru_walk_node,
++    .api_mmput_async = mmput_async,
++    .api_security_binder_set_context_mgr = security_binder_set_context_mgr,
++    .api_security_binder_transaction = security_binder_transaction,
++    .api_security_binder_transfer_binder = security_binder_transfer_binder,
++    .api_security_binder_transfer_file = security_binder_transfer_file,
++    .api_security_cred_getsecid = security_cred_getsecid,
++    .api_security_release_secctx = security_release_secctx,
++    .api_security_secid_to_secctx = security_secid_to_secctx,
++    .api_task_work_add = task_work_add,
++    .api_zap_page_range_single = zap_page_range_single,
++};
++EXPORT_SYMBOL_GPL(dijun_hmos_ipc_api_v2);
++
++/* modpost honors this marker when TRIM_UNUSED_KSYMS=y. */
++static const char dijun_hmos_keep[] __used __section(".no_trim_symbol") =
++    "dijun_hmos_ipc_api_v2";
+diff -ruN a/drivers/android/Kconfig b/drivers/android/Kconfig
+--- a/drivers/android/Kconfig	2026-11-04 19:21:48.000000000 +0800
++++ b/drivers/android/Kconfig	2026-11-15 02:26:15.860062577 +0800
+@@ -120,4 +120,16 @@
+ 
+ 	  If even slightly unsure, say Y.
+ 
++config DIJUN_HMOS_IPC_API
++	bool "Read-only typed API table for external dijun Harmony IPC"
++	depends on MODULES && MMU && SECURITY && ANDROID_VENDOR_HOOKS
++	default n
++	help
++	  Export a versioned const table of typed security/MM helpers for
++	  the external dijun_hmos_ipc module. No token device or Binder
++	  implementation is included here. Use a clean upstream kernel;
++	  do not combine with built-in HMOS token/Binder extensions.
++	  The table is derived from the upstream AnyHarmonyOSNext 6.6 adaptation
++	  port; the exported symbol is dijun-owned.
++
+ endmenu
+diff -ruN a/drivers/android/Makefile b/drivers/android/Makefile
+--- a/drivers/android/Makefile	2026-11-04 19:21:48.000000000 +0800
++++ b/drivers/android/Makefile	2026-11-14 12:25:54.830129300 +0800
+@@ -7,3 +7,4 @@
+ obj-y	+= binder/
+ obj-$(CONFIG_ANDROID_VENDOR_HOOKS) += vendor_hooks.o
+ obj-$(CONFIG_ANDROID_DEBUG_KINFO)	+= debug_kinfo.o
++obj-$(CONFIG_DIJUN_HMOS_IPC_API)	+= dijun_hmos_ipc_exports.o

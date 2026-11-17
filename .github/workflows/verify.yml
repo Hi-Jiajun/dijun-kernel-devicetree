@@ -15,5 +15,5 @@ jobs:
         run: python3 -m py_compile tools/*.py
       - name: Shell syntax
         run: bash -n scripts/*.sh
-      - name: Build reconstructed baseline
-        run: make b
+      - name: Full offline verification
+        run: make verify
