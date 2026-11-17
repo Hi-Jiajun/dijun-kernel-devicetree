@@ -18,6 +18,11 @@
 - 归档只读符号 SDK `symvers/6.18.32-os4.0.4.0/`（`vmlinux-pure`、`vmlinux-hmos`、`vendor-modules`），新增 `scripts/build-extmod.sh` 实现外部 `.ko` 隔离构建与四重门禁。
 - 收纳 `patches/6.18/hmos/0001-dijun-hmos-ipc-readonly-typed-api-v2.patch` 与 `patches/6.18/panthor/` 规划，升级 `scripts/build-kernel.sh` 支持 `--profile` 且锁死 `LOCALVERSION=""` 不再吞掉门禁错误。
 
+### 板级硬件契约、许可证与公开合规门禁
+- 新增 [`docs/hardware-contracts/`](docs/hardware-contracts/README.md)，集中记录 `O1_asic`/`dijun` 身份边界、A/B 物理分区表映射、CPU `policy0/2/4/8` 跳号拓扑、`DEVTMPFS=n`/`pstore` 约束与 OS4.0.4.0 五大子系统模块加载闭包。
+- 升级 `tools/module-inventory.py`：移除 `nm`/`readelf`/`modinfo` 外部依赖并改用纯 Python `_elfmod.KoElf`，新增 `--closure` 导出 `depends ∪ 导出符号 ∪ softdep pre:` 拓扑加载序与 `.modinfo` 参数表。
+- 补齐标准 GNU GPL-2.0 完整正文（`LICENSE`、`COPYING`、`LICENSES/preferred/GPL-2.0`、`LICENSES/exceptions/Linux-syscall-note`）与精细化 `NOTICE`；新增 `scripts/audit-public-ready.sh` 与 `make audit`，接入 `verify.sh` 及全历史 CI 检查（`fetch-depth: 0`）。
+
 ## 2026-11-09
 
 ### dijun 内核设备树基线

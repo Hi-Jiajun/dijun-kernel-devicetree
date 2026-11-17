@@ -31,9 +31,10 @@
 | `configs/6.18/` | OS4.0.0.19/OS4.0.4.0 原始 config、多版本符号白名单、配置片段 `fragments/` 与场景基线 `baselines/` |
 | `symvers/6.18.32-os4.0.4.0/` | 只读内核符号表 (`vmlinux-pure`/`vmlinux-hmos`) 与原厂 332 模块导出表 (`vendor-modules.symvers`) |
 | `patches/6.18/` | 受控内核补丁集（`hmos` IPC 导出表、`panthor` 内建说明） |
-| `tools/` | Python 工具：`_elfmod.py`、`fdtdiff.py`、`abi-gate.py`、`export-mod-symvers.py`、`dtbo-extract.py`、`mkdtboimg.py`、`module-inventory.py`、`btf-diff.py`、`kmi-check.py`、`patch-module-crc.py` |
-| `scripts/` | 构建与验证脚本：`verify.sh`、`build-kernel.sh`、`build-extmod.sh`、`pack-boot.sh`、`pack-vendor_boot.sh`、`demo-patch.sh` |
-| `docs/` | 设备树、内核兼容、外部模块 SDK、真机运行记录与原始 diff 报告 |
+| `tools/` | Python 工具：`_elfmod.py`、`fdtdiff.py`、`abi-gate.py`、`export-mod-symvers.py`、`dtbo-extract.py`、`mkdtboimg.py`、`module-inventory.py`（含 `--closure` 拓扑导出）、`btf-diff.py`、`kmi-check.py`、`patch-module-crc.py` |
+| `scripts/` | 构建与验证脚本：`verify.sh`、`audit-public-ready.sh`、`build-kernel.sh`、`build-extmod.sh`、`pack-boot.sh`、`pack-vendor_boot.sh`、`demo-patch.sh` |
+| `docs/` | 设备树、板级与模块硬件契约（[`hardware-contracts/`](docs/hardware-contracts/)）、内核兼容、外部模块 SDK、真机运行记录与原始 diff 报告 |
+| `LICENSES/` | 完整 `GPL-2.0` 与 `Linux-syscall-note` SPDX 许可正文（配合根目录 `LICENSE`、`COPYING`、`LICENSE-MIT`、`NOTICE`） |
 
 ## 快速开始
 
@@ -42,8 +43,14 @@
 ```bash
 unset PYTHONHOME PYTHONPATH      # 避免宿主环境污染 Python encodings
 make b overlays                  # 编译全部三代 B 基线 (base.dtb + 24 个 dtbo) 与自定义 overlays
-make verify                      # 全量离线验收（回编校验、fdtoverlay、容器重打、demo-patch、脱敏门禁）
+make verify                      # 全量离线验收（回编校验、fdtoverlay、容器重打、demo-patch、公开审计门禁）
+make audit                       # 单独运行许可证 1:1 配对、违禁二进制与 Git 历史脱敏审计
 make dtboimg-os4                 # 重打 OS4.0.4.0 dtbo.img
+
+# 纯 Python 导出指定内核模块集合的拓扑加载闭包与 .modinfo 参数表
+python3 tools/module-inventory.py \
+  --tree vendor_boot:<extracted-vendor_boot> --tree vendor_dlkm:<extracted-vendor_dlkm> \
+  --closure xring_drm,synaptics_tcm2 --closure-out closure-display-touch.md
 ```
 
 ### 2. 构建外部内核模块（6.18.32-4k，不修改内核树）
@@ -89,5 +96,5 @@ scripts/pack-vendor_boot.sh --stock-img <stock_vendor_boot.img> --dtb build/b/6.
 ## 边界与许可
 
 - 仅用于**自有设备**的授权研究，仓库内不含设备分区镜像、厂商 `.ko`、固件二进制或未脱敏敏感信息。
-- `dts-oss/`、`include/` 来自小米开源 `dijun-v-oss`（GPL-2.0 / MIT）；`dts-reconstructed/`、`baseline/`、`patches/` 为 GPL-2.0 内核衍生或补丁（见 [`LICENSE`](LICENSE)）；`tools/`、`scripts/` 为 MIT（见 [`LICENSE-MIT`](LICENSE-MIT)）。
+- `dts-oss/`、`include/` 来自小米开源 `dijun-v-oss`（GPL-2.0 / MIT）；`dts-reconstructed/`、`baseline/`、`patches/` 为 GPL-2.0 内核衍生或补丁（见 [`LICENSE`](LICENSE)、[`COPYING`](COPYING) 与 [`NOTICE`](NOTICE)）；`tools/`、`scripts/`、`overlays/custom/` 为 MIT（见 [`LICENSE-MIT`](LICENSE-MIT)）。
 - 社区参考：`lolipuru/android_device_xiaomi_dijun`、`xiatian410/xringo1-twrp`、`Lw5959/dijun_orangefox`、`Lw5959/dijun_skyward`（非本仓库内容）。

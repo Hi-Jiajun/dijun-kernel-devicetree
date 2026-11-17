@@ -16,6 +16,7 @@
 #   make dtboimg-os4-4019  用 OS4.0.0.19 的 8 个 entry 重打 dtbo.img
 #   make dtboimg-os4    用 OS4.0.4.0 的 8 个 entry 重打 dtbo.img
 #   make vendor_boot    需配合 STOCK_VENDOR_BOOT=<stock.img> 调用 pack-vendor_boot.sh
+#   make audit          运行公开合规与 Git 历史脱敏审计门禁
 #   make kbuild-v KDIR=<内核树>   用内核树自身 kbuild 编 V 基线（dtstree= 外部设备树）
 #   make kbuild-b KDIR=<内核树> [BVER=6.18.21-os4.0.4.0]  用内核树编指定 B 基线
 #   make clean          清理 build/ 目录
@@ -49,7 +50,7 @@ B_TARGETS := $(B_BASES) $(B_DTBOS) $(B_O2S_LINKS)
 OVL_SRCS := $(sort $(wildcard $(ROOT)/overlays/custom/*.dtso))
 OVL_TARGETS := $(patsubst $(ROOT)/overlays/custom/%.dtso,$(B)/overlays/%.dtbo,$(OVL_SRCS))
 
-.PHONY: all v b overlays dtboimg dtboimg-os3 dtboimg-os4-4019 dtboimg-os4 vendor_boot verify kbuild-v kbuild-b clean help
+.PHONY: all v b overlays dtboimg dtboimg-os3 dtboimg-os4-4019 dtboimg-os4 vendor_boot verify audit kbuild-v kbuild-b clean help
 .DEFAULT_GOAL := all
 
 all: v b overlays
@@ -109,6 +110,9 @@ vendor_boot: $(B)/b/$(BVER)/base.dtb
 
 verify:
 	bash $(ROOT)/scripts/verify.sh
+
+audit:
+	bash $(ROOT)/scripts/audit-public-ready.sh --check-history
 
 kbuild-v:
 	@test -n "$(KDIR)" || { echo "用法: make kbuild-v KDIR=<内核树>"; exit 2; }

@@ -1,5 +1,20 @@
-本仓库包含来自小米开源 dijun 内核设备树（dijun-v-oss）的 GPL-2.0 / MIT 代码，原始 SPDX 头保留在各文件内。
+# Notice & License Attribution
 
-`baseline/`（原厂 base.dtb 与 dtbo entry）与 `dts-reconstructed/`（由设备分区二进制还原的 DTS）属于 GPL 内核二进制的衍生产物，仓库整体按 GPL-2.0（见 LICENSE）分发；`tools/` 与 `scripts/` 为自写脚本，按 MIT（见 LICENSE-MIT）分发。
+本仓库包含来自小米开源 `dijun` 内核设备树（`dijun-v-oss`）以及基于开源 Linux / AOSP 内核接口构建的工具、配置与文档，仅用于**自有设备**的授权技术研究与开发。
 
-本仓库不包含设备分区镜像、厂商闭源二进制或任何凭据。仅限自有设备的授权研究使用。
+## 各目录许可与源码对应关系
+
+1. **`dts-oss/6.6.30-android15-v/` 与 `include/`**
+   - 源自小米官方开源设备树仓库（`dijun-v-oss`），原始 `SPDX-License-Identifier` 声明（`GPL-2.0` / `MIT`）保留在各自文件头中。
+
+2. **`baseline/`、`dts-reconstructed/`、`configs/6.18/`、`symvers/`、`patches/6.18/`**
+   - `baseline/<ver>/base.dtb` 与 `baseline/<ver>/dtbo/entry*.dtbo` 为 GPL-2.0 内核设备树二进制产物，已在 `dts-reconstructed/<ver>/` 下逐一提供 **1:1 对应的完整机器可读源码**（共 `6.6.118-os3`、`6.18.21-os4.0.0.19`、`6.18.21-os4.0.4.0` 三代 × 9 个 = 27 对 `.dts` ↔ `.dtb/.dtbo`，经 `dtc` 回编字节一致），满足 GNU GPL v2 第 3 条要求。
+   - 仓库整体主许可及上述内核衍生内容、内核补丁与 Kconfig/symvers 文件按 **GNU GPL-2.0**（见根目录 [`LICENSE`](LICENSE)、[`COPYING`](COPYING) 及 [`LICENSES/preferred/GPL-2.0`](LICENSES/preferred/GPL-2.0)）分发。
+
+3. **`tools/`、`scripts/`、`overlays/custom/`**
+   - 本仓库自研的 Python 分析/打包/校验工具（含 `_elfmod.py`、`fdtdiff.py`、`abi-gate.py`、`export-mod-symvers.py`、`dtbo-extract.py`、`mkdtboimg.py`、`module-inventory.py`、`btf-diff.py`、`kmi-check.py`、`patch-module-crc.py`）、构建/验证/审计脚本及自定义 `.dtso` 示例按 **MIT License**（见 [`LICENSE-MIT`](LICENSE-MIT) 及各文件 SPDX 头）分发。
+
+## 内容边界声明
+
+- 本仓库**不包含**任何设备完整分区镜像（`boot.img`/`vendor_boot.img`/`super.img`）、厂商闭源驱动 `.ko`、芯片固件二进制（如 `mali_csffw.bin`/触控固件/TEE TA）、设备私有序列号、本地主机路径或任何凭据。
+- `docs/` 与 `docs/hardware-contracts/` 均已脱敏并仅基于实测硬件契约与开源工具输出整理；第三方开源仓库仅作链接引用。

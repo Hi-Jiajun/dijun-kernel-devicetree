@@ -143,20 +143,22 @@ else
     ng "存在断链: $broken_links"
 fi
 
-# 检查受控仓库内容无敏感路径/用户名/设备序列号泄露（排除构建产物与缓存目录）
-_pat_user="hil""iang"
-_pat_host="arch-""9700x"
-_pat_sn="0285""AC2001A00540"
-_pat_ip="192\.168\.1\."
-_pat_home="<""home>"
-if grep -rnIE "${_pat_user}|${_pat_host}|${_pat_sn}|${_pat_ip}" \
-    --exclude-dir=.git --exclude-dir=build --exclude-dir=__pycache__ --exclude-dir=.dsh-project-memory \
-    --exclude='*.bak*' . >build/verify-sanitize.log 2>&1; then
-    ng "检测到未脱敏字符串，见 build/verify-sanitize.log"
-elif grep -rnI "$_pat_home" Makefile scripts tools >build/verify-sanitize.log 2>&1; then
-    ng "可执行代码或脚本中检测到无效占位符，见 build/verify-sanitize.log"
+if unset PYTHONHOME PYTHONPATH && python3 tools/module-inventory.py --help >/dev/null 2>&1; then
+    ok "module-inventory.py CLI 可调用"
 else
-    ok "敏感信息与本地路径脱敏扫描 CLEAN"
+    ng "module-inventory.py CLI 自检失败"
+fi
+
+# 运行完整公开合规与脱敏门禁（仅工作区，CI/make audit 可加 --check-history）
+audit_args=()
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    audit_args+=(--check-history)
+fi
+if bash scripts/audit-public-ready.sh "${audit_args[@]}" >build/verify-sanitize.log 2>&1; then
+    ok "公开合规与敏感历史脱敏审计 PASS"
+else
+    cat build/verify-sanitize.log >&2 || true
+    ng "公开合规与脱敏审计失败，见 build/verify-sanitize.log"
 fi
 
 printf '\n汇总: PASS=%d FAIL=%d\n' "$pass" "$fail"

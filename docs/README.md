@@ -15,6 +15,13 @@
 - [2026-11-10-compat-baseline-and-feature-gates.md](kernel-compat/2026-11-10-compat-baseline-and-feature-gates.md) — 兼容基线与功能开关的构建记录
 - [2026-11-17-extmod-sdk-and-profiles.md](kernel-compat/2026-11-17-extmod-sdk-and-profiles.md) — 6.18.32-4k 双契约（`vermagic` + `module_layout`）、`symvers` SDK、`build-extmod.sh` 与多线 Profile 构建
 
+## 板级与模块硬件契约
+
+- [hardware-contracts/README.md](hardware-contracts/README.md) — `dijun` 板级硬约束总索引（全部基于实测与原厂模块离线分析）
+- [hardware-contracts/platform-and-partitions.md](hardware-contracts/platform-and-partitions.md) — 三层身份命名（`O1_asic` / `dijun` / `0x090f0000`）、UFS A/B 物理分区映射与 L1/L2 刷写红线
+- [hardware-contracts/soc-and-kernel-constraints.md](hardware-contracts/soc-and-kernel-constraints.md) — CPU 四簇跳号拓扑（`policy0/2/4/8`）、G925/DPU 真值、`# CONFIG_DEVTMPFS is not set`、`pstore/ramoops`
+- [hardware-contracts/module-closures-os4.0.4.0.md](hardware-contracts/module-closures-os4.0.4.0.md) — OS4.0.4.0 五大子系统加载闭包（UFS/USB/显示触控/电源/GPU）与 `hwid.ko` 参数硬契约
+
 ## 真机运行记录
 
 - [2026-11-09-selfbuild-first-boot-failure.md](runbooks/2026-11-09-selfbuild-first-boot-failure.md) — 首测卡开机动画与回滚
