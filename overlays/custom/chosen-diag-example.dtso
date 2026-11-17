@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+/plugin/;
+
+/*
+ * 最小增量 overlay 示例：向 /chosen 添加构建/诊断标记属性。
+ * 用法：编译后通过 fdtoverlay 叠加至 base.dtb。
+ */
+/ {
+	fragment@0 {
+		target-path = "/chosen";
+		__overlay__ {
+			dijun,overlay-sample = "ok";
+		};
+	};
+};

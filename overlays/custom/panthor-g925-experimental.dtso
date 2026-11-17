@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+/plugin/;
+
+/*
+ * [实验候选 / 未上机]
+ * Immortalis-G925 (CSF arch v13.8) 切换开源 DRM panthor 驱动所需的 GPU 节点覆盖。
+ *
+ * 前置条件：
+ *   1. 内核配置需开启 CONFIG_DRM_PANTHOR=y（内建进 Image，因 GKI 默认不导出 drm_sched/drm_gpuvm）；
+ *   2. 需在内核侧补齐 GPU core clk_hw 桥接（接管原厂 gpufreq/vote_mng 通道）并补全 clocks；
+ *   3. 需提供提取的 firmware: arm/mali/arch13.8/mali_csffw.bin；
+ *   4. 运行时不得与闭源 mali_kbase.ko 同时加载；
+ *   5. 注意：FDT overlay 无法删除 base.dtb 中原有的 operating-points-v2 属性（dtc /delete-property/
+ *      仅作用于当前节点），正式启用时若 devfreq_init 因 opp_table0 缺 opp-microvolt 报错，需在
+ *      base.dts 衍生分支中移除 operating-points-v2 或禁用 opp_table0。
+ *
+ * 目标节点核对自 baseline/6.18.21-os4.0.4.0/base.dtb（/soc/gpu@E9F80000，__symbols__: gpu_subsys）。
+ */
+/ {
+	fragment@0 {
+		target-path = "/soc/gpu@E9F80000";
+		__overlay__ {
+			compatible = "arm,mali-valhall-csf";
+			interrupt-names = "job", "mmu", "gpu";
+			mali-supply = <&gpu_subsys>;
+		};
+	};
+};
