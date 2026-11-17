@@ -1,0 +1,14 @@
+=== baseline/6.18.21-os4.0.0.19/base.dtb
+=== baseline/6.18.21-os4.0.4.0/base.dtb
+only in baseline/6.18.21-os4.0.0.19/base.dtb: 3
+  - /ddr_profile_monitor
+  - /dvfs_track
+  - /soc/ddr_pattern_trace
+only in baseline/6.18.21-os4.0.4.0/base.dtb: 0
+属性差异: 2
+  ~ /__symbols__ : pattern_trace
+      baseline/6.18.21-os4.0.0.19/base.dtb: str('/soc/ddr_pattern_trace')
+      baseline/6.18.21-os4.0.4.0/base.dtb: <缺失>
+  ~ /vote_mng_test : status
+      baseline/6.18.21-os4.0.0.19/base.dtb: <缺失>
+      baseline/6.18.21-os4.0.4.0/base.dtb: str('disabled')

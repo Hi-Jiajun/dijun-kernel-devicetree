@@ -1,0 +1,8 @@
+=== baseline/6.18.21-os4.0.4.0/base.dtb
+=== build/v/O1_basic.dtb
+only in baseline/6.18.21-os4.0.4.0/base.dtb: 219
+  ... 另有 219 项
+only in build/v/O1_basic.dtb: 90
+  ... 另有 90 项
+属性差异: 538
+  ... 另有 538 项

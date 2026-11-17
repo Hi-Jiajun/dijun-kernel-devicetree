@@ -4,5 +4,5 @@ only in baseline/6.6.118-os3/base.dtb: 30
   ... 另有 30 项
 only in build/v/O1_basic.dtb: 12
   ... 另有 12 项
-属性差异: 698
-  ... 另有 698 项
+属性差异: 133
+  ... 另有 133 项
