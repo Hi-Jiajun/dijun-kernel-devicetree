@@ -1,13 +1,16 @@
-# 6.18 构建配置（dijun / OS4.0.0.19 & OS4.0.4.0）
+# 6.18 构建配置（dijun / OS4.0.0.19, OS4.0.4.0 & OS4.0.5.0）
 
 - `dijun-os4.config`：OS4.0.0.19 设备运行中 `/proc/config.gz` 原样导出（6.18.21 基线）。
-- `dijun-os4.0.4.0.config`：OS4.0.4.0 设备运行中 `/proc/config.gz` 原样导出（新增 `CONFIG_DPM_WATCHDOG=y` 等）。构建时不要手工归一化；`olddefconfig` 会自动丢弃本树不存在的厂商私有选项。
+- `dijun-os4.0.4.0.config`：OS4.0.4.0 设备运行中 `/proc/config.gz` 原样导出（新增 `CONFIG_DPM_WATCHDOG=y` 等）。
+- `dijun-os4.0.5.0.config`：OS4.0.5.0 `boot.img` 内核 `extract-ikconfig` 原样导出（与 `dijun-os4.0.4.0.config` 逐字节完全一致，`08d01cd15a30e805…`）。构建时不要手工归一化；`olddefconfig` 会自动丢弃本树不存在的厂商私有选项。
 - 白名单系列（用作 `UNUSED_KSYMS_WHITELIST`，让 `TRIM_UNUSED_KSYMS=y` 下仍导出必需符号）：
   - `ksym-whitelist-os4.0.0.19.txt`（4,945 条）
-  - `ksym-whitelist-os4.0.4.0.txt`（4,951 条；`ksym-whitelist.txt` 默认软链至此）
+  - `ksym-whitelist-os4.0.4.0.txt`（4,951 条）
+  - `ksym-whitelist-os4.0.5.0.txt`（4,951 条；`ksym-whitelist.txt` 默认软链至此）
   - `ksym-whitelist-hmos.txt`（4,955 条；补齐 `dijun_hmos_ipc_api_v2`、`get_task_pid`、`pid_nr_ns`、`task_active_pid_ns`）
-- `fragments/`：可叠加配置片段（`pidns.config`、`hmos-ipc.config`、`panthor-builtin.config`）。
-- `baselines/`：分场景环境契约（`os4.0.0.19.env`、`os4.0.4.0-pure.env`、`os4.0.4.0-hmos.env`）；`baseline.env` 对齐当前默认 `OS4.0.4.0 / 6.18.32-4k` 契约（含 `VERMAGIC` 与 `MODULE_LAYOUT_CRC=0x60801db3`）。
+  - `ksym-whitelist-hmos-opt2.txt`（4,964 条；在 `hmos` 基础上补齐 `LZ4_*HC` 4 项与 `USER_NS` 的 `make_kuid`/`from_kuid*`/`make_kgid`/`from_kgid` 5 项，消除未签名外部模块命中 `KSYM_FLAG_PROTECTED` 的风险）
+- `fragments/`：可叠加配置片段（`pidns.config`、`hmos-ipc.config`、`hmos-opt2.config`、`panthor-builtin.config`）。
+- `baselines/`：分场景环境契约（`os4.0.0.19.env`、`os4.0.4.0-pure.env`、`os4.0.4.0-hmos.env`、`os4.0.5.0-pure.env`、`os4.0.5.0-hmos-opt2.env`）；`baseline.env` 对齐当前现役 `OS4.0.5.0 / 6.18.32-hmos-opt2` 契约（含 `VERMAGIC` 与 `MODULE_LAYOUT_CRC=0x60801db3`）。
 
 ## 已知被丢弃的厂商私有选项
 

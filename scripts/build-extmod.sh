@@ -6,7 +6,7 @@
 #   1. 只读引用 --kernel-src 与 --mod-src，将模块源码干净复制到隔离工作区编译；
 #   2. 强制锁死 LOCALVERSION="-4k"、CONFIG_LOCALVERSION_AUTO=n、make LOCALVERSION="" 与
 #      KBUILD_GENDWARFKSYMS_STABLE=1，杜绝 "+/-dirty" 导致的 vermagic ENOEXEC；
-#   3. 使用仓库 symvers/6.18.32-os4.0.4.0/vmlinux-{hmos,pure}.symvers（含 module_layout=0x60801db3），
+#   3. 使用仓库 symvers/6.18.32-os4.0.{5,4}.0/vmlinux-{hmos-opt2,hmos,pure}.symvers（含 module_layout=0x60801db3），
 #      避免误改硬编码构建树造成的符号 CRC 漂移；
 #   4. 产出的每个 .ko 必须通过四重门禁（数量>=1、vermagic 逐字匹配、module_layout==0x60801db3、
 #      abi-gate.py 0 错误），并输出 build-manifest.json。
@@ -14,7 +14,8 @@
 # 用法：
 #   CLANG_BIN=<clang-r584948c/bin> scripts/build-extmod.sh \
 #     --kernel-src <6.18.32 源码树> --mod-src <模块源码目录> --out <输出目录> \
-#     [--profile hmos|pure] [--vendor-symvers] [--extra-symvers <file>]... \
+#     [--baseline os4.0.5.0|os4.0.4.0] [--profile hmos-opt2|hmos|pure] \
+#     [--vendor-symvers] [--extra-symvers <file>]... \
 #     [--make-arg KEY=VAL]... [--prep-cache <dir>] \
 #     [--sign-key <pem> --sign-cert <x509>] [--jobs 16]
 set -euo pipefail
@@ -24,7 +25,8 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 KERNEL_SRC=""
 MOD_SRC=""
 OUT=""
-PROFILE="hmos"
+BASELINE="os4.0.5.0"
+PROFILE="hmos-opt2"
 USE_VENDOR_SYMVERS=0
 EXTRA_SYMVERS=()
 EXTRA_MAKE_ARGS=()
@@ -42,6 +44,7 @@ while [ $# -gt 0 ]; do
         --kernel-src) KERNEL_SRC=${2:?}; shift 2;;
         --mod-src) MOD_SRC=${2:?}; shift 2;;
         --out) OUT=${2:?}; shift 2;;
+        --baseline) BASELINE=${2:?}; shift 2;;
         --profile) PROFILE=${2:?}; shift 2;;
         --vendor-symvers) USE_VENDOR_SYMVERS=1; shift;;
         --extra-symvers) EXTRA_SYMVERS+=("${2:?}"); shift 2;;
@@ -63,20 +66,33 @@ if [ -n "$SIGN_KEY" ] || [ -n "$SIGN_CERT" ]; then
     [ -r "$SIGN_KEY" ] && [ -r "$SIGN_CERT" ] || { echo "--sign-key 与 --sign-cert 必须同时有效" >&2; exit 2; }
 fi
 
+case "$BASELINE" in
+    os4.0.5.0|os4.0.4.0) ;;
+    *) echo "未知 --baseline: $BASELINE（可选 os4.0.5.0 / os4.0.4.0）" >&2; exit 2;;
+esac
+
 case "$PROFILE" in
+    hmos-opt2)
+        if [ -r "$ROOT/symvers/6.18.32-$BASELINE/vmlinux-hmos-opt2.symvers" ]; then
+            VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-$BASELINE/vmlinux-hmos-opt2.symvers"
+        else
+            VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-os4.0.5.0/vmlinux-hmos-opt2.symvers"
+        fi
+        WHITELIST="$ROOT/configs/6.18/ksym-whitelist-hmos-opt2.txt"
+        ;;
     hmos)
-        VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-os4.0.4.0/vmlinux-hmos.symvers"
+        VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-$BASELINE/vmlinux-hmos.symvers"
         WHITELIST="$ROOT/configs/6.18/ksym-whitelist-hmos.txt"
         ;;
     pure)
-        VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-os4.0.4.0/vmlinux-pure.symvers"
-        WHITELIST="$ROOT/configs/6.18/ksym-whitelist-os4.0.4.0.txt"
+        VMLINUX_SYMVERS="$ROOT/symvers/6.18.32-$BASELINE/vmlinux-pure.symvers"
+        WHITELIST="$ROOT/configs/6.18/ksym-whitelist-$BASELINE.txt"
         ;;
-    *) echo "未知 --profile: $PROFILE（可选 hmos / pure）" >&2; exit 2;;
+    *) echo "未知 --profile: $PROFILE（可选 hmos-opt2 / hmos / pure）" >&2; exit 2;;
 esac
 
-BASE_CONFIG="$ROOT/configs/6.18/dijun-os4.0.4.0.config"
-VENDOR_SYMVERS="$ROOT/symvers/6.18.32-os4.0.4.0/vendor-modules.symvers"
+BASE_CONFIG="$ROOT/configs/6.18/dijun-$BASELINE.config"
+VENDOR_SYMVERS="$ROOT/symvers/6.18.32-$BASELINE/vendor-modules.symvers"
 for req in "$VMLINUX_SYMVERS" "$WHITELIST" "$BASE_CONFIG"; do
     [ -r "$req" ] || { echo "缺少仓库基线文件: $req" >&2; exit 2; }
 done

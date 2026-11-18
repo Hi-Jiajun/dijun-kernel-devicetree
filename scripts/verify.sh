@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # 离线全量验收：
-#   L0  编译全部三代 B 基线（base.dtb + 全部 8 个 dtbo）与自定义 overlays
-#   L0h 校验三代 27 个产物的回编一致（dtc >= 1.8 要求逐字节相等；旧版 dtc 回退零结构差异校验）
+#   L0  编译全部四代 B 基线（base.dtb + 全部 8 个 dtbo）与自定义 overlays
+#   L0h 校验四代 36 个产物的回编一致（dtc >= 1.8 要求逐字节相等；旧版 dtc 回退零结构差异校验）
 #   L1  若传入 KERNEL=<树>，编译 V 基线并输出结构 diff
-#   L2  fdtoverlay 验证 overlays/custom/*.dtbo 可干净合并到 6.18.21-os4.0.4.0 base.dtb
-#   L3  mkdtboimg.py 重打三代 dtbo.img 并用 dtbo-extract.py 校验 8 条目
+#   L2  fdtoverlay 验证 overlays/custom/*.dtbo 可干净合并到 6.18.21-os4.0.5.0 base.dtb
+#   L3  mkdtboimg.py 重打四代 dtbo.img 并用 dtbo-extract.py 校验 8 条目
 #   L4  运行 demo-patch.sh、校验 symvers 格式，并扫描仓库确认无敏感字符串/路径泄露
 # 退出码：0 全部通过（SKIP 不计失败）；1 有失败项。
 set -uo pipefail
@@ -29,7 +29,7 @@ if [ -n "$DTC_MAJOR" ] && [ -n "$DTC_MINOR" ]; then
 fi
 printf 'INFO  dtc=%s (strict_overlay_bytes=%d)\n' "${DTC_VER:-unknown}" "$STRICT_OVERLAY_BYTES"
 
-note "L0 编译三代 B 基线与自定义 overlays"
+note "L0 编译四代 B 基线与自定义 overlays"
 mkdir -p build
 if make -s -B b overlays >build/verify-make.log 2>&1; then
     ok "make b overlays 退出码 0"
@@ -37,7 +37,7 @@ else
     ng "make b overlays 失败，见 build/verify-make.log"
 fi
 
-for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0; do
+for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0 6.18.21-os4.0.5.0; do
     built_base="build/b/$v/base.dtb"
     stock_base="baseline/$v/base.dtb"
     if [ -s "$built_base" ] && [ "$(sha256sum "$built_base" | cut -d' ' -f1)" = "$(sha256sum "$stock_base" | cut -d' ' -f1)" ]; then
@@ -82,7 +82,7 @@ done
 note "L1 V 基线（官方 OSS）与 B 基线结构差异（预期存在，只记录不判失败）"
 if [ -n "${KERNEL:-}" ]; then
     make -s v >build/verify-make-v.log 2>&1 && ok "make v 退出码 0" || ng "make v 失败，见 build/verify-make-v.log"
-    for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0; do
+    for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0 6.18.21-os4.0.5.0; do
         python3 tools/fdtdiff.py "baseline/$v/base.dtb" build/v/O1_basic.dtb --max-diff 0 \
             >"docs/reports/l1-v-vs-$v-base.txt" 2>&1 \
             && ok "结构 diff -> docs/reports/l1-v-vs-$v-base.txt" || ng "结构 diff 失败（$v）"
@@ -94,12 +94,12 @@ else
     printf 'SKIP  未设置 KERNEL，跳过 V 基线与结构 diff\n'
 fi
 
-note "L2 自定义 overlays 合并验证 (fdtoverlay -> 6.18.21-os4.0.4.0/base.dtb)"
+note "L2 自定义 overlays 合并验证 (fdtoverlay -> 6.18.21-os4.0.5.0/base.dtb)"
 if command -v fdtoverlay >/dev/null 2>&1; then
     for ovl in build/overlays/*.dtbo; do
         [ -s "$ovl" ] || continue
         bn=$(basename "$ovl" .dtbo)
-        if fdtoverlay -i build/b/6.18.21-os4.0.4.0/base.dtb -o "build/merged-$bn.dtb" "$ovl" >"build/fdtoverlay-$bn.log" 2>&1; then
+        if fdtoverlay -i build/b/6.18.21-os4.0.5.0/base.dtb -o "build/merged-$bn.dtb" "$ovl" >"build/fdtoverlay-$bn.log" 2>&1; then
             ok "fdtoverlay $bn 合并成功"
         else
             ng "fdtoverlay $bn 合并失败，见 build/fdtoverlay-$bn.log"
@@ -110,7 +110,7 @@ else
 fi
 
 note "L3 dtbo 容器重打与条目校验"
-for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0; do
+for v in 6.6.118-os3 6.18.21-os4.0.0.19 6.18.21-os4.0.4.0 6.18.21-os4.0.5.0; do
     out=build/dtbo-$v.img
     python3 tools/mkdtboimg.py --out "$out" \
         $(for f in baseline/$v/dtbo/*.dtbo; do printf -- '--entry %s ' "$f"; done) >"build/verify-dtbo-$v.log" 2>&1 \
@@ -129,10 +129,15 @@ fi
 
 if grep -q $'^0x60801db3\tmodule_layout\tvmlinux' symvers/6.18.32-os4.0.4.0/vmlinux-pure.symvers \
    && grep -q $'^0xcf4c0200\tdijun_hmos_ipc_api_v2\tvmlinux' symvers/6.18.32-os4.0.4.0/vmlinux-hmos.symvers \
-   && grep -q $'^0x39bc4e1a\tedr_drv_submit_api_sync\t' symvers/6.18.32-os4.0.4.0/vendor-modules.symvers; then
-    ok "symvers/6.18.32-os4.0.4.0 三份符号表关键契约齐全"
+   && grep -q $'^0x39bc4e1a\tedr_drv_submit_api_sync\t' symvers/6.18.32-os4.0.4.0/vendor-modules.symvers \
+   && grep -q $'^0x60801db3\tmodule_layout\tvmlinux' symvers/6.18.32-os4.0.5.0/vmlinux-pure.symvers \
+   && grep -q $'^0xcf4c0200\tdijun_hmos_ipc_api_v2\tvmlinux' symvers/6.18.32-os4.0.5.0/vmlinux-hmos-opt2.symvers \
+   && grep -q $'\tmake_kuid\tvmlinux' symvers/6.18.32-os4.0.5.0/vmlinux-hmos-opt2.symvers \
+   && grep -q $'\tLZ4_compress_HC\tvmlinux' symvers/6.18.32-os4.0.5.0/vmlinux-hmos-opt2.symvers \
+   && grep -q $'^0x39bc4e1a\tedr_drv_submit_api_sync\t' symvers/6.18.32-os4.0.5.0/vendor-modules.symvers; then
+    ok "symvers/6.18.32-os4.0.{4,5}.0 及 hmos-opt2 符号表关键契约齐全"
 else
-    ng "symvers/6.18.32-os4.0.4.0 缺少关键符号契约"
+    ng "symvers/6.18.32-os4.0.{4,5}.0 缺少关键符号契约"
 fi
 
 # 检查所有相对软链无断链

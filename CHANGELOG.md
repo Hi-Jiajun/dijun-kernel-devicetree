@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-18 (`v2026.11-os4.0.5.0-opt2`)
+
+### `OS4.0.5.0` 设备树基线同步与权威对比
+- 新增 `baseline/6.18.21-os4.0.5.0/` 与 `dts-reconstructed/6.18.21-os4.0.5.0/`（`base.dtb` 221,460 B + 全部 8 个 `.dtbo` 无损反编译，宿主 `dtc 1.8.1` 往返回编 100% 字节一致），并将 `dts-current`、`baseline/6.18.21-os4`、`dts-reconstructed/6.18.21-os4` 软链切换至 `6.18.21-os4.0.5.0`。
+- 使用 `tools/fdtdiff.py` 完成 `OS4.0.4.0` vs `OS4.0.5.0` 主 DTB 与 8 个 DTBO 全量比对（[`docs/device-tree/2026-11-18-os4-4.0.5.0-dt-and-opt2-sync.md`](docs/device-tree/2026-11-18-os4-4.0.5.0-dt-and-opt2-sync.md)、[`docs/reports/os4.0.4.0-vs-os4.0.5.0-dt-diff.txt`](docs/reports/os4.0.4.0-vs-os4.0.5.0-dt-diff.txt)），确认 9/9 二进制与节点属性零变化（镜像差异仅来自 `vendor_cmdline` 指纹与 AVB 签名）。
+- 升级 `Makefile`（新增 `make check`、`dtboimg-os4-4040`、四代 B 基线构建）、`scripts/verify.sh`、`scripts/demo-patch.sh`、`NOTICE` 与 `scripts/audit-public-ready.sh`（36 对 `.dtb/.dtbo` ↔ `.dts` 1:1 源码配对门禁）。
+
+### `6.18.32-hmos-opt2` KABI 符号基线与 `OS4.0.5.0` 模块闭包契约
+- 新增只读符号 SDK [`symvers/6.18.32-os4.0.5.0/`](symvers/6.18.32-os4.0.5.0/)（含 `vmlinux-hmos-opt2.symvers` `3,655` 导出、`vmlinux-hmos.symvers` `3,646` 导出、`vmlinux-pure.symvers` `3,642` 导出及 `OS4.0.5.0` 332 模块 `vendor-modules.symvers` `2,518` 导出）。
+- 新增 `configs/6.18/dijun-os4.0.5.0.config`、`configs/6.18/fragments/hmos-opt2.config`、`configs/6.18/ksym-whitelist-hmos-opt2.txt`（4,964 条）与 `baselines/os4.0.5.0-{pure,hmos-opt2}.env`；升级 `scripts/build-kernel.sh` 与 `scripts/build-extmod.sh` 原生支持 `--baseline os4.0.5.0` 与 `--profile hmos-opt2`。
+- 新增 [`docs/hardware-contracts/module-closures-os4.0.5.0.md`](docs/hardware-contracts/module-closures-os4.0.5.0.md)，固化 **Safe63（63 模块 = 27 预载 + 36 增量）零 USB 抖动充电安全闭包 vs 4 个 Type-C 动态重枚举模块（`ex_pd_protocol`/`tcpc_sc660x`/`mca_xring_usb`/`protocol_pd_manager`）断连边界**、**GPU Stage 0 v2 7 模块解耦闭包**、**音频/`CS40L26A` 线性马达 12/20 模块两阶段解耦闭包**及早期 USB `init-state = "peripheral"` DTBO 硬前提。
+
 ## 2026-11-17 (`v2026.11-os4.0.4.0-sdk`)
 
 ### 设备树基线与结构防误判

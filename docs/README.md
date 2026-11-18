@@ -5,6 +5,7 @@
 - [2026-11-09-research-device-tree.md](device-tree/2026-11-09-research-device-tree.md) — dijun 设备树现状、V/B 两代差异、主流做法与选型、跨内核可移植性
 - [2026-11-09-build-and-verify.md](device-tree/2026-11-09-build-and-verify.md) — 从分区取件到回编、打包、验收的运行记录
 - [2026-11-17-os4-4.0.4.0-dt-baseline.md](device-tree/2026-11-17-os4-4.0.4.0-dt-baseline.md) — OS4.0.4.0 设备树基线、全 8 个 DTBO 还原、目录防误判重构、`fdtdiff.py` 修复与 `.dtso` 增量开发流
+- [2026-11-18-os4-4.0.5.0-dt-and-opt2-sync.md](device-tree/2026-11-18-os4-4.0.5.0-dt-and-opt2-sync.md) — OS4.0.5.0 设备树基线无损同步、4.0.4.0 vs 4.0.5.0 全量 0 差异对比与 `6.18.32-hmos-opt2` KABI 对齐
 
 ## 内核兼容与构建 SDK
 
@@ -20,6 +21,7 @@
 - [hardware-contracts/README.md](hardware-contracts/README.md) — `dijun` 板级硬约束总索引（全部基于实测与原厂模块离线分析）
 - [hardware-contracts/platform-and-partitions.md](hardware-contracts/platform-and-partitions.md) — 三层身份命名（`O1_asic` / `dijun` / `0x090f0000`）、UFS A/B 物理分区映射与 L1/L2 刷写红线
 - [hardware-contracts/soc-and-kernel-constraints.md](hardware-contracts/soc-and-kernel-constraints.md) — CPU 四簇跳号拓扑（`policy0/2/4/8`）、G925/DPU 真值、`# CONFIG_DEVTMPFS is not set`、`pstore/ramoops`
+- [hardware-contracts/module-closures-os4.0.5.0.md](hardware-contracts/module-closures-os4.0.5.0.md) — OS4.0.5.0 Safe63 零 USB 抖动充电闭包 vs 4 个 Type-C 模块边界、GPU Stage 0 v2 7 模块闭包与音频/触觉 12/20 模块两阶段闭包
 - [hardware-contracts/module-closures-os4.0.4.0.md](hardware-contracts/module-closures-os4.0.4.0.md) — OS4.0.4.0 五大子系统加载闭包（UFS/USB/显示触控/电源/GPU）与 `hwid.ko` 参数硬契约
 
 ## 真机运行记录

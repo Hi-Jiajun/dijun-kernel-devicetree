@@ -6,8 +6,8 @@
 #   CLANG_BIN=<clang-r584948c/bin> RUSTC=<rustc> RUST_LIB_SRC=<rustlib/src/rust/library> \
 #   BINDGEN=<bindgen> scripts/build-kernel.sh \
 #     --source <aosp 6.18 tree> --out <build dir> \
-#     [--profile stock-abi|pidns|hmos|panthor] \
-#     [--baseline os4.0.4.0|os4.0.0.19] \
+#     [--profile stock-abi|pidns|hmos|hmos-opt2|panthor] \
+#     [--baseline os4.0.5.0|os4.0.4.0|os4.0.0.19] \
 #     [--apply-patches] [--localversion -4k] \
 #     [--config <override.config>] [--whitelist <override.txt>] \
 #     [--sign <module.ko>]... [--gate-modules <dir>]... [--jobs 16]
@@ -20,7 +20,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SOURCE=""
 OUT=""
 PROFILE="stock-abi"
-BASELINE="os4.0.4.0"
+BASELINE="os4.0.5.0"
 CONFIG=""
 WHITELIST=""
 LOCALVER="-4k"
@@ -57,16 +57,20 @@ done
 
 if [ -z "$CONFIG" ]; then
     case "$BASELINE" in
+        os4.0.5.0) CONFIG="$ROOT/configs/6.18/dijun-os4.0.5.0.config";;
         os4.0.4.0) CONFIG="$ROOT/configs/6.18/dijun-os4.0.4.0.config";;
         os4.0.0.19) CONFIG="$ROOT/configs/6.18/dijun-os4.config";;
-        *) echo "未知 --baseline: $BASELINE（可选 os4.0.4.0 / os4.0.0.19）" >&2; exit 2;;
+        *) echo "未知 --baseline: $BASELINE（可选 os4.0.5.0 / os4.0.4.0 / os4.0.0.19）" >&2; exit 2;;
     esac
 fi
 
 FRAGMENTS=()
 PATCH_DIR=""
+DEFAULT_WL=0
 if [ -z "$WHITELIST" ]; then
+    DEFAULT_WL=1
     case "$BASELINE" in
+        os4.0.5.0) WHITELIST="$ROOT/configs/6.18/ksym-whitelist-os4.0.5.0.txt";;
         os4.0.4.0) WHITELIST="$ROOT/configs/6.18/ksym-whitelist-os4.0.4.0.txt";;
         os4.0.0.19) WHITELIST="$ROOT/configs/6.18/ksym-whitelist-os4.0.0.19.txt";;
     esac
@@ -78,22 +82,29 @@ case "$PROFILE" in
     hmos)
         FRAGMENTS+=("$ROOT/configs/6.18/fragments/hmos-ipc.config")
         PATCH_DIR="$ROOT/patches/6.18/hmos"
-        if [ "$BASELINE" = "os4.0.4.0" ] && [ "$WHITELIST" = "$ROOT/configs/6.18/ksym-whitelist-os4.0.4.0.txt" ]; then
+        if [ "$DEFAULT_WL" -eq 1 ]; then
             WHITELIST="$ROOT/configs/6.18/ksym-whitelist-hmos.txt"
+        fi
+        ;;
+    hmos-opt2)
+        FRAGMENTS+=("$ROOT/configs/6.18/fragments/hmos-opt2.config")
+        PATCH_DIR="$ROOT/patches/6.18/hmos"
+        if [ "$DEFAULT_WL" -eq 1 ]; then
+            WHITELIST="$ROOT/configs/6.18/ksym-whitelist-hmos-opt2.txt"
         fi
         ;;
     panthor)
         FRAGMENTS+=("$ROOT/configs/6.18/fragments/panthor-builtin.config")
         PATCH_DIR="$ROOT/patches/6.18/panthor"
         ;;
-    *) echo "未知 --profile: $PROFILE（可选 stock-abi / pidns / hmos / panthor）" >&2; exit 2;;
+    *) echo "未知 --profile: $PROFILE（可选 stock-abi / pidns / hmos / hmos-opt2 / panthor）" >&2; exit 2;;
 esac
 
 [ -r "$CONFIG" ] || { echo "配置不存在: $CONFIG" >&2; exit 2; }
 [ -r "$WHITELIST" ] || { echo "白名单不存在: $WHITELIST" >&2; exit 2; }
 WHITELIST=$(readlink -f "$WHITELIST")
 
-if [ "$PROFILE" = "hmos" ] && [ ! -f "$SOURCE/drivers/android/dijun_hmos_ipc_exports.c" ]; then
+if { [ "$PROFILE" = "hmos" ] || [ "$PROFILE" = "hmos-opt2" ]; } && [ ! -f "$SOURCE/drivers/android/dijun_hmos_ipc_exports.c" ]; then
     if [ "$APPLY_PATCHES" -eq 1 ]; then
         echo "== 应用 patches/6.18/hmos/*.patch 到 $SOURCE"
         for p in "$PATCH_DIR"/*.patch; do

@@ -2,3 +2,4 @@
 *.dtb binary
 *.dtbo binary
 *.img binary
+*.symvers -whitespace
