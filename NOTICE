@@ -8,7 +8,7 @@
    - 源自小米官方开源设备树仓库（`dijun-v-oss`），原始 `SPDX-License-Identifier` 声明（`GPL-2.0` / `MIT`）保留在各自文件头中。
 
 2. **`baseline/`、`dts-reconstructed/`、`configs/6.18/`、`symvers/`、`patches/6.18/`**
-   - `baseline/<ver>/base.dtb` 与 `baseline/<ver>/dtbo/entry*.dtbo` 为 GPL-2.0 内核设备树二进制产物，已在 `dts-reconstructed/<ver>/` 下逐一提供 **1:1 对应的完整机器可读源码**（共 `6.6.118-os3`、`6.18.21-os4.0.0.19`、`6.18.21-os4.0.4.0` 三代 × 9 个 = 27 对 `.dts` ↔ `.dtb/.dtbo`，经 `dtc` 回编字节一致），满足 GNU GPL v2 第 3 条要求。
+   - `baseline/<ver>/base.dtb` 与 `baseline/<ver>/dtbo/entry*.dtbo` 为 GPL-2.0 内核设备树二进制产物，已在 `dts-reconstructed/<ver>/` 下逐一提供 **1:1 对应的完整机器可读源码**（共 `6.6.118-os3`、`6.18.21-os4.0.0.19`、`6.18.21-os4.0.4.0`、`6.18.21-os4.0.5.0` 四代 × 9 个 = 36 对 `.dts` ↔ `.dtb/.dtbo`，经 `dtc` 回编字节一致），满足 GNU GPL v2 第 3 条要求。
    - 仓库整体主许可及上述内核衍生内容、内核补丁与 Kconfig/symvers 文件按 **GNU GPL-2.0**（见根目录 [`LICENSE`](LICENSE)、[`COPYING`](COPYING) 及 [`LICENSES/preferred/GPL-2.0`](LICENSES/preferred/GPL-2.0)）分发。
 
 3. **`tools/`、`scripts/`、`overlays/custom/`**

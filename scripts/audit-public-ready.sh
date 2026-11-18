@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # 公开前合规与全量脱敏门禁：
 #   Gate 1  完整许可证文件体系校验（LICENSE / COPYING / LICENSES / LICENSE-MIT / NOTICE）
-#           与 27 对 DTB/DTBO ↔ DTS 1:1 源码配对校验
+#           与 36 对 DTB/DTBO ↔ DTS 1:1 源码配对校验
 #   Gate 2  违禁二进制（.ko/.img/.bin/.so/.apk/.ta/.key/压缩包）与私有工具目录拦截
 #   Gate 3  工作区受控文件与 Git 历史敏感串/本地路径/占位符扫描
 #
@@ -75,10 +75,10 @@ for b in baseline/*/base.dtb baseline/*/dtbo/*.dtbo; do
         dt_pairs=$((dt_pairs + 1))
     fi
 done
-if [ "$g1_bad" -eq 0 ] && [ "$dt_missing" -eq 0 ] && [ "$dt_pairs" -eq 27 ]; then
-    ok "Gate 1 许可证体系完整且 $dt_pairs/27 个 DTB/DTBO 具备 1:1 源码配对"
-elif [ "$dt_pairs" -ne 27 ]; then
-    ng "Gate 1 预期 27 对基线产物，实际检测到 $dt_pairs 对 (缺失 $dt_missing)"
+if [ "$g1_bad" -eq 0 ] && [ "$dt_missing" -eq 0 ] && [ "$dt_pairs" -eq 36 ]; then
+    ok "Gate 1 许可证体系完整且 $dt_pairs/36 个 DTB/DTBO 具备 1:1 源码配对"
+elif [ "$dt_pairs" -ne 36 ]; then
+    ng "Gate 1 预期 36 对基线产物，实际检测到 $dt_pairs 对 (缺失 $dt_missing)"
 fi
 
 # Gate 2 & 3 通用正则（以字符串分段拼接，避免脚本自身触发自匹配）

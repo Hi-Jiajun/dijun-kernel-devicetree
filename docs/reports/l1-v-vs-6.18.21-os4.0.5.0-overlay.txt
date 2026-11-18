@@ -1,0 +1,11 @@
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo
+=== build/v/o2s_phone_overlay.dtbo
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo: 19
+  ... 另有 19 项
+only in build/v/o2s_phone_overlay.dtbo: 7
+  ... 另有 7 项
+属性差异: 93
+  ... 另有 93 项
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo 4 个，仅 build/v/o2s_phone_overlay.dtbo 2 个
+  仅 baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo: ['cpnv', 'pcie_smmu', 'xr_audio_pinctrl', 'xring_veu_wb']
+  仅 build/v/o2s_phone_overlay.dtbo: ['fk_audio_pinctrl', 'xring_veu']

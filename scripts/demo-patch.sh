@@ -9,7 +9,7 @@ set -euo pipefail
 unset PYTHONHOME PYTHONPATH
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-BASELINE_VER="6.18.21-os4.0.4.0"
+BASELINE_VER="6.18.21-os4.0.5.0"
 KEEP_TMP=0
 
 while [ $# -gt 0 ]; do

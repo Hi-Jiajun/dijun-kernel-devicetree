@@ -1,0 +1,71 @@
+# fdtdiff: baseline/6.18.21-os4.0.4.0 vs baseline/6.18.21-os4.0.5.0
+## base.dtb
+=== baseline/6.18.21-os4.0.4.0/base.dtb
+=== baseline/6.18.21-os4.0.5.0/base.dtb
+only in baseline/6.18.21-os4.0.4.0/base.dtb: 0
+only in baseline/6.18.21-os4.0.5.0/base.dtb: 0
+属性差异: 0
+
+## dtbo/entry00_id09000001_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry00_id09000001_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry00_id09000001_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry00_id09000001_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry00_id09000001_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry00_id09000001_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry00_id09000001_rev0.dtbo 0 个
+
+## dtbo/entry01_id09000002_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry01_id09000002_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry01_id09000002_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry01_id09000002_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry01_id09000002_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry01_id09000002_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry01_id09000002_rev0.dtbo 0 个
+
+## dtbo/entry02_id09000003_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry02_id09000003_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry02_id09000003_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry02_id09000003_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry02_id09000003_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry02_id09000003_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry02_id09000003_rev0.dtbo 0 个
+
+## dtbo/entry03_id09000004_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry03_id09000004_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry03_id09000004_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry03_id09000004_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry03_id09000004_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry03_id09000004_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry03_id09000004_rev0.dtbo 0 个
+
+## dtbo/entry04_id09000005_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry04_id09000005_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry04_id09000005_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry04_id09000005_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry04_id09000005_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry04_id09000005_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry04_id09000005_rev0.dtbo 0 个
+
+## dtbo/entry05_id090f0000_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry05_id090f0000_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry05_id090f0000_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry05_id090f0000_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry05_id090f0000_rev0.dtbo 0 个
+
+## dtbo/entry06_id09080101_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry06_id09080101_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry06_id09080101_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry06_id09080101_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry06_id09080101_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry06_id09080101_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry06_id09080101_rev0.dtbo 0 个
+
+## dtbo/entry07_id09020101_rev0.dtbo
+=== baseline/6.18.21-os4.0.4.0/dtbo/entry07_id09020101_rev0.dtbo
+=== baseline/6.18.21-os4.0.5.0/dtbo/entry07_id09020101_rev0.dtbo
+only in baseline/6.18.21-os4.0.4.0/dtbo/entry07_id09020101_rev0.dtbo: 0
+only in baseline/6.18.21-os4.0.5.0/dtbo/entry07_id09020101_rev0.dtbo: 0
+属性差异: 0
+__fixups__ 标签: 仅 baseline/6.18.21-os4.0.4.0/dtbo/entry07_id09020101_rev0.dtbo 0 个，仅 baseline/6.18.21-os4.0.5.0/dtbo/entry07_id09020101_rev0.dtbo 0 个
